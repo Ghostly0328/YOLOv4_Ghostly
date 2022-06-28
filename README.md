@@ -1,6 +1,8 @@
 # YOLOv4
 
-This is PyTorch implementation of [YOLOv4](https://github.com/AlexeyAB/darknet) which is based on [ultralytics/yolov3](https://github.com/ultralytics/yolov3).
+This is PyTorch implementation of [YOLOv4](https://github.com/AlexeyAB/darknet) which is based on [[YOLOv4_WongKinYiu on github]](https://github.com/WongKinYiu/PyTorch_YOLOv4).
+
+* [[ultralytics/yolov3]](https://github.com/ultralytics/yolov3)
 
 * [[original Darknet implementation of YOLOv4]](https://github.com/AlexeyAB/darknet)
 
@@ -11,80 +13,7 @@ This is PyTorch implementation of [YOLOv4](https://github.com/AlexeyAB/darknet) 
 <details><summary> <b>Expand</b> </summary>
 
 * `2022-06-28` - change local paths. upload to Github. 
-* `2021-10-31` - support [RS loss](https://arxiv.org/abs/2107.11669), [aLRP loss](https://arxiv.org/abs/2009.13592), [AP loss](https://arxiv.org/abs/2008.07294).
-* `2021-10-30` - support [alpha IoU](https://arxiv.org/abs/2110.13675).
-* `2021-10-20` - design resolution calibration methods.
-* `2021-10-15` - support joint detection, instance segmentation, and semantic segmentation. [`seg-yolo`]()
-* `2021-10-13` - design ratio yolo.
-* `2021-09-22` - pytorch 1.9 compatibility.
-* `2021-09-21` - support [DIM](https://arxiv.org/abs/1808.06670).
-* `2021-09-16` - support [Dynamic Head](https://arxiv.org/abs/2106.08322).
-* `2021-08-28` - design domain adaptive training.
-* `2021-08-22` - design re-balance models.
-* `2021-08-21` - support [simOTA](https://arxiv.org/abs/2107.08430).
-* `2021-08-14` - design approximation-based methods.
-* `2021-07-27` - design new decoders.
-* `2021-07-22` - support 1) decoupled head, 2) anchor-free, and 3) multi positives in [yolox](https://arxiv.org/abs/2107.08430).
-* `2021-07-10` - design distribution-based implicit modeling.
-* `2021-07-06` - support outlooker attention. [`volo`](https://arxiv.org/abs/2106.13112)
-* `2021-07-06` - design self emsemble training method.
-* `2021-06-23` - design cross multi-stage correlation module.
-* `2021-06-18` - design cross stage cross correlation module.
-* `2021-06-17` - support cross correlation module. [`ccn`](https://arxiv.org/abs/2010.12138)
-* `2021-06-17` - support attention modules. [`cbam`](https://arxiv.org/abs/1807.06521) [`saan`](https://arxiv.org/abs/2010.12138)
-* `2021-04-20` - support swin transformer. [`swin`](https://arxiv.org/abs/2103.14030)
-* `2021-03-16` - design new stem layers.
-* `2021-03-13` - design implicit modeling. [`nn`]() [`mf`]() [`lc`]() 
-* `2021-01-26` - support vision transformer. [`tr`](https://arxiv.org/abs/2010.11929)
-* `2021-01-26` - design mask objectness.
-* `2021-01-25` - design rotate augmentation.
-* `2021-01-23` - design collage augmentation.
-* `2021-01-22` - support [VoVNet](https://arxiv.org/abs/1904.09730), [VoVNetv2](https://arxiv.org/abs/1911.06667).
-* `2021-01-22` - support [EIoU](https://arxiv.org/abs/2101.08158).
-* `2021-01-19` - support instance segmentation. [`mask-yolo`]()
-* `2021-01-17` - support anchor-free-based methods. [`center-yolo`]()
-* `2021-01-14` - support joint detection and classification. [`classify-yolo`]()
-* `2020-01-02` - design new [PRN](https://github.com/WongKinYiu/PartialResidualNetworks) and [CSP](https://github.com/WongKinYiu/CrossStagePartialNetworks)-based models.
-* `2020-12-22` - support transfer learning.
-* `2020-12-18` - support non-local series self-attention blocks. [`gc`](https://arxiv.org/abs/1904.11492) [`dnl`](https://arxiv.org/abs/2006.06668)
-* `2020-12-16` - support down-sampling blocks in cspnet paper. [`down-c`]() [`down-d`](https://arxiv.org/abs/1812.01187)
-* `2020-12-03` - support imitation learning.
-* `2020-12-02` - support [squeeze and excitation](https://arxiv.org/abs/1709.01507).
-* `2020-11-26` - support multi-class multi-anchor joint detection and embedding.
-* `2020-11-25` - support [joint detection and embedding](https://arxiv.org/abs/1909.12605). [`track-yolo`]()
-* `2020-11-23` - support teacher-student learning.
-* `2020-11-17` - pytorch 1.7 compatibility. 
-* `2020-11-06` - support inference with initial weights. 
-* `2020-10-21` - fully supported by darknet. 
-* `2020-09-18` - design fine-tune methods. 
-* `2020-08-29` - support [deformable kernel](https://arxiv.org/abs/1910.02940).
-* `2020-08-25` - pytorch 1.6 compatibility.
-* `2020-08-24` - support channel last training/testing. 
-* `2020-08-16` - design CSPPRN. 
-* `2020-08-15` - design deeper model. [`csp-p6-mish`]()
-* `2020-08-11` - support [HarDNet](https://arxiv.org/abs/1909.00948). [`hard39-pacsp`]() [`hard68-pacsp`]() [`hard85-pacsp`]()
-* `2020-08-10` - add DDP training.
-* `2020-08-06` - support [DCN](https://arxiv.org/abs/1703.06211), [DCNv2](https://arxiv.org/abs/1811.11168). [`yolov4-dcn`]()
-* `2020-08-01` - add pytorch hub.
-* `2020-07-31` - support [ResNet](https://arxiv.org/abs/1512.03385), [ResNeXt](https://arxiv.org/abs/1611.05431), [CSPResNet](https://github.com/WongKinYiu/CrossStagePartialNetworks), [CSPResNeXt](https://github.com/WongKinYiu/CrossStagePartialNetworks). [`r50-pacsp`]() [`x50-pacsp`]() [`cspr50-pacsp`]() [`cspx50-pacsp`]()
-* `2020-07-28` - support [SAM](https://arxiv.org/abs/2004.10934). [`yolov4-pacsp-sam`]()
-* `2020-07-24` - update api.
-* `2020-07-23` - support CUDA accelerated Mish activation function.
-* `2020-07-19` - support and training tiny YOLOv4. [`yolov4-tiny`]()
-* `2020-07-15` - design and training conditional YOLOv4. [`yolov4-pacsp-conditional`]()
-* `2020-07-13` - support [MixUp](https://arxiv.org/abs/1710.09412) data augmentation.
-* `2020-07-03` - design new stem layers.
-* `2020-06-16` - support floating16 of GPU inference.
-* `2020-06-14` - convert .pt to .weights for darknet fine-tuning.
-* `2020-06-13` - update multi-scale training strategy.
-* `2020-06-12` - design scaled YOLOv4 follow [ultralytics](https://github.com/ultralytics/yolov5). [`yolov4-pacsp-s`]() [`yolov4-pacsp-m`]() [`yolov4-pacsp-l`]() [`yolov4-pacsp-x`]()
-* `2020-06-07` - design [scaling methods](https://github.com/WongKinYiu/PyTorch_YOLOv4/blob/master/images/scalingCSP.png) for CSP-based models. [`yolov4-pacsp-25`]() [`yolov4-pacsp-75`]()
-* `2020-06-03` - update COCO2014 to COCO2017.
-* `2020-05-30` - update FPN neck to CSPFPN. [`yolov4-yocsp`]() [`yolov4-yocsp-mish`]()
-* `2020-05-24` - update neck of YOLOv4 to CSPPAN. [`yolov4-pacsp`]() [`yolov4-pacsp-mish`]()
-* `2020-05-15` - training YOLOv4 with Mish activation function. [`yolov4-yospp-mish`]() [`yolov4-paspp-mish`]()
-* `2020-05-08` - design and training YOLOv4 with [FPN](https://arxiv.org/abs/1612.03144) neck. [`yolov4-yospp`]()
-* `2020-05-01` - training YOLOv4 with Leaky activation function using PyTorch. [`yolov4-paspp`]() [`PAN`](https://arxiv.org/abs/1803.01534)
+* `2022-06-28` - Start to build a new one.
 
 </details>
 
@@ -149,7 +78,7 @@ This is PyTorch implementation of [YOLOv4](https://github.com/AlexeyAB/darknet) 
 
 ## Requirements
 
-docker (recommanded):
+~~docker (recommanded):~~ (I don't know how to use it.)
 ```
 # create the docker container, you can change the share memory size if you have more.
 nvidia-docker run --name yolov4 -it -v your_coco_path/:/coco/ -v your_code_path/:/yolo --shm-size=64g nvcr.io/nvidia/pytorch:20.11-py3
@@ -176,8 +105,19 @@ cd /yolo
 local:
 ```
 pip install -r requirements.txt
+
+#Download .weight and .cfg.
+
 ```
 ※ For running Mish models, please install https://github.com/thomasbrandon/mish-cuda
+
+## Detect
+
+```
+python detect.py --cfg ./models/cfg/yolov3.cfg --weights ./models/weights/yolov3_320.weights --source ./data/samples/ 
+
+#python detect.py -h #使用說明
+```
 
 ## Training
 
