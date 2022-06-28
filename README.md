@@ -106,8 +106,8 @@ local:
 ```
 pip install -r requirements.txt
 
-#Download .weight and .cfg.
-
+Download .weight and .cfg. #去下載你要用的YOLO版本 V3 or V4
+Put under to the ./models/weights/ and ./models/cfg/ #放到 ./models/weights/ 和 ./models/cfg/
 ```
 ※ For running Mish models, please install https://github.com/thomasbrandon/mish-cuda
 
