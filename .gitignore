@@ -9,6 +9,9 @@ __pycache__/
 # YOLO Weights
 *.weights
 
+# NO Output
+Output/
+
 # Distribution / packaging
 .Python
 build/
@@ -27,7 +30,6 @@ share/python-wheels/
 *.egg-info/
 .installed.cfg
 *.egg
-Output
 MANIFEST
 
 # PyInstaller
