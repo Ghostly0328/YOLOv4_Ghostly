@@ -10,6 +10,7 @@ This is PyTorch implementation of [YOLOv4](https://github.com/AlexeyAB/darknet) 
 
 <details><summary> <b>Expand</b> </summary>
 
+* `2022-06-28` - change local paths. upload to Github. 
 * `2021-10-31` - support [RS loss](https://arxiv.org/abs/2107.11669), [aLRP loss](https://arxiv.org/abs/2009.13592), [AP loss](https://arxiv.org/abs/2008.07294).
 * `2021-10-30` - support [alpha IoU](https://arxiv.org/abs/2110.13675).
 * `2021-10-20` - design resolution calibration methods.
