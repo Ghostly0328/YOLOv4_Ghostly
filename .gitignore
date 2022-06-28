@@ -13,7 +13,7 @@ __pycache__/
 .Python
 build/
 develop-eggs/
-dist/
+dist/   
 downloads/
 eggs/
 .eggs/
@@ -27,7 +27,7 @@ share/python-wheels/
 *.egg-info/
 .installed.cfg
 *.egg
-Output/
+Output
 MANIFEST
 
 # PyInstaller
