@@ -6,10 +6,10 @@ __pycache__/
 # C extensions
 *.so
 
-# YOLO Weights
+# YOLO Weights 排除權重檔
 *.weights
 
-# NO Output
+# NO Output 排除輸出文件
 Output/
 
 # Distribution / packaging
