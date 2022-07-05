@@ -11,6 +11,9 @@ __pycache__/
 
 # NO Output 排除輸出文件
 Output/
+data/dataset/
+runs/
+wandb/
 
 # Distribution / packaging
 .Python

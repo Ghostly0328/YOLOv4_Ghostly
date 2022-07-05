@@ -1,8 +1,12 @@
-import argparse
+'''
+轉換檔案 yolovX.pt to onnx coreML
+'''
+from utils.google_utils  import *
 
+import argparse
+from importlib import import_module
 import torch
 
-from utils.google_utils import attempt_download
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
