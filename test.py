@@ -162,7 +162,7 @@ def test(data,
             if plots and len(wandb_images) < log_imgs:
                 box_data = [{"position": {"minX": xyxy[0], "minY": xyxy[1], "maxX": xyxy[2], "maxY": xyxy[3]},
                              "class_id": int(cls),
-                             "box_caption": "%s %.3f" % (names[cls], conf),
+                             "box_caption": "%s %.3f" % (names[int(cls)], conf),
                              "scores": {"class_score": conf},
                              "domain": "pixel"} for *xyxy, conf, cls in pred.tolist()]
                 boxes = {"predictions": {"box_data": box_data, "class_labels": names}}
@@ -309,7 +309,7 @@ if __name__ == '__main__':
     parser.add_argument('--name', default='exp', help='save to project/name')
     parser.add_argument('--exist-ok', action='store_true', help='existing project/name ok, do not increment')
     parser.add_argument('--cfg', type=str, default='cfg/yolov4.cfg', help='*.cfg path')
-    parser.add_argument('--names', type=str, default='data/coco.names', help='*.cfg path')
+    parser.add_argument('--names', type=str, default='data/Pascal.names', help='*.cfg path')
     opt = parser.parse_args()
     opt.save_json |= opt.data.endswith('coco.yaml')
     opt.data = check_file(opt.data)  # check file

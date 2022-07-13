@@ -1,0 +1,10 @@
+#data path
+train: ./data/dataset/VOCmix_2007_2012/train2007.txt
+val: ./data/dataset/VOCmix_2007_2012/test2012.txt
+
+# number of classes
+nc: 20
+
+# class names
+names: ['aeroplane', 'bicycle', 'bird', 'boat', 'bottle', 'bus', 'car', 'cat', 'chair', 'cow', 'diningtable', 'dog', 'horse',
+        'motorbike', 'person', 'pottedplant', 'sheep', 'sofa', 'train', 'tvmonitor']

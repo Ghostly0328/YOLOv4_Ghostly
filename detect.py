@@ -181,7 +181,7 @@ if __name__ == '__main__':
     parser.add_argument('--augment', action='store_true', help='augmented inference')
     parser.add_argument('--update', action='store_true', help='update all models')
     parser.add_argument('--cfg', type=str, default='models/cfg/yolov4.cfg', help='*.cfg path')
-    parser.add_argument('--names', type=str, default='data/coco.names', help='*.cfg path')
+    parser.add_argument('--names', type=str, default='data/Pascal.names', help='*.cfg path')
 
     opt = parser.parse_args()
     print(opt) #Setting Data Inf.
