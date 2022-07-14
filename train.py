@@ -44,8 +44,8 @@ except ImportError:
 
 def train(hyp, opt, device, tb_writer=None, wandb=None):
     logger.info(f'Hyperparameters {hyp}')
-    save_dir, epochs, batch_size, total_batch_size, weights, rank = \
-        Path(opt.save_dir), opt.epochs, opt.batch_size, opt.total_batch_size, opt.weights, opt.global_rank
+    save_dir, epochs, batch_size, total_batch_size, weights, rank ,drive_backup = \
+        Path(opt.save_dir), opt.epochs, opt.batch_size, opt.total_batch_size, opt.weights, opt.global_rank, opt.drive
 
     # Directories
     wdir = save_dir / 'weights'
@@ -427,6 +427,18 @@ def train(hyp, opt, device, tb_writer=None, wandb=None):
                 elif epoch >= 420: 
                     torch.save(ckpt, wdir / 'last_{:03d}.pt'.format(epoch))
                 del ckpt
+            
+            if drive_backup:
+                import shutil
+
+                #delete BackUp folder
+                if os.path.isdir('/content/gdrive/MyDrive/Backup'):
+                    shutil.rmtree('/content/gdrive/MyDrive/Backup')
+
+                #backUp file
+                shutil.copy('/content/gdrive/MyDrive/Backup', '/content/YOLOv4_WongKinYiu/runs/')
+                shutil.copy('/content/gdrive/MyDrive/Backup', '/content/YOLOv4_WongKinYiu/wandb/')
+                
         # end epoch ----------------------------------------------------------------------------------------------------
     # end training
 
@@ -487,6 +499,7 @@ if __name__ == '__main__':
     parser.add_argument('--project', default='runs/train', help='save to project/name')
     parser.add_argument('--name', default='exp', help='save to project/name')
     parser.add_argument('--exist-ok', action='store_true', help='existing project/name ok, do not increment')
+    parser.add_argument('--drive', action='store_ture', help='colab back up')
     opt = parser.parse_args()
 
     # Set DDP variables
