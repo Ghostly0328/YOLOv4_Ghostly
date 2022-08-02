@@ -167,8 +167,8 @@ def detect(save_img=False):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
 
-    parser.add_argument('--weights',nargs='+', type=str, default= ['./models/weights/yolov4.weights'] , help='model.pt path(s)')
-    parser.add_argument('--source', type=str, default='data/samples', help='source')  # file/folder, 0 for webcam ,Image or Mp4
+    parser.add_argument('--weights',nargs='+', type=str, default= ['./runs/train/yolov4-ts-Pascal14/weights/last.pt'] , help='model.pt path(s)')
+    parser.add_argument('--source', type=str, default='data/samples/Images', help='source')  # file/folder, 0 for webcam ,Image or Mp4
     parser.add_argument('--output', type=str, default='Output', help='output folder')  # output folder
     parser.add_argument('--img-size', type=int, default=640, help='inference size (pixels)') 
     parser.add_argument('--conf-thres', type=float, default=0.4, help='object confidence threshold')
@@ -180,7 +180,7 @@ if __name__ == '__main__':
     parser.add_argument('--agnostic-nms', action='store_true', help='class-agnostic NMS')
     parser.add_argument('--augment', action='store_true', help='augmented inference')
     parser.add_argument('--update', action='store_true', help='update all models')
-    parser.add_argument('--cfg', type=str, default='models/cfg/yolov4.cfg', help='*.cfg path')
+    parser.add_argument('--cfg', type=str, default='./models/cfg/yolov4-ts.cfg', help='*.cfg path')
     parser.add_argument('--names', type=str, default='data/Pascal.names', help='*.cfg path')
 
     opt = parser.parse_args()

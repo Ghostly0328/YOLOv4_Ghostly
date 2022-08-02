@@ -364,3 +364,19 @@ class ScaleSpatial(nn.Module):  # weighted sum of 2 or more layers https://arxiv
     def forward(self, x, outputs):
         a = outputs[self.layers[0]]
         return x * a
+
+
+class RegpPooling2D(nn.Module): # 應用層 http://dx.doi.org/10.14311/nnw.2019.29.004
+    def __init__(self, kernel_size, stride, padding):
+        super(RegpPooling2D, self).__init__()
+        self.kernel_size = kernel_size
+        self.stride = stride
+        self.padding = padding
+
+    def _RegpPooling2D(self, x):
+        
+        return 0
+
+    def forward(self, x):
+        #TODO 添加POOLING方法      
+        return self._RegpPooling2D(x)

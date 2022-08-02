@@ -6,7 +6,6 @@ import torch.nn.functional as F
 from torch.autograd import Variable
 import numpy as np
 
-#TODO:分析
 
 def parse_cfg(cfgfile):
     """

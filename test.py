@@ -5,6 +5,7 @@ import os
 from pathlib import Path
 
 import numpy as np
+from sympy import false
 import torch
 import yaml
 from tqdm import tqdm
@@ -159,14 +160,15 @@ def test(data,
                         f.write(('%g ' * len(line)).rstrip() % line + '\n')
 
             # W&B logging
-            if plots and len(wandb_images) < log_imgs:
-                box_data = [{"position": {"minX": xyxy[0], "minY": xyxy[1], "maxX": xyxy[2], "maxY": xyxy[3]},
-                             "class_id": int(cls),
-                             "box_caption": "%s %.3f" % (names[int(cls)], conf),
-                             "scores": {"class_score": conf},
-                             "domain": "pixel"} for *xyxy, conf, cls in pred.tolist()]
-                boxes = {"predictions": {"box_data": box_data, "class_labels": names}}
-                wandb_images.append(wandb.Image(img[si], boxes=boxes, caption=path.name))
+            # if plots and len(wandb_images) < log_imgs:
+            #     box_data = [{"position": {"minX": xyxy[0], "minY": xyxy[1], "maxX": xyxy[2], "maxY": xyxy[3]},
+            #                  "class_id": int(cls),
+            #                  "box_caption": "%s %.3f" % (names[cls], conf),
+            #                  "scores": {"class_score": conf},
+            #                  "domain": "pixel"} for *xyxy, conf, cls in pred.tolist()]
+            #     boxes = {"predictions": {"box_data": box_data, "class_labels": names}}
+            #     print(boxes)
+            #     wandb_images.append(wandb.Image(img[si], boxes=boxes, caption=path.name))
 
             # Clip boxes to image bounds
             clip_coords(pred, (height, width))
@@ -291,13 +293,14 @@ def test(data,
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(prog='test.py')
+
     parser.add_argument('--weights', nargs='+', type=str, default='yolov4.pt', help='model.pt path(s)')
     parser.add_argument('--data', type=str, default='data/coco.yaml', help='*.data path')
-    parser.add_argument('--batch-size', type=int, default=32, help='size of each image batch')
+    parser.add_argument('--batch-size', type=int, default=2, help='size of each image batch')
     parser.add_argument('--img-size', type=int, default=640, help='inference size (pixels)')
     parser.add_argument('--conf-thres', type=float, default=0.001, help='object confidence threshold')
     parser.add_argument('--iou-thres', type=float, default=0.65, help='IOU threshold for NMS')
-    parser.add_argument('--task', default='val', help="'val', 'test', 'study'")
+    parser.add_argument('--task', default='val', help="'val', 'test', 'study' choose in .yaml dataset")
     parser.add_argument('--device', default='', help='cuda device, i.e. 0 or 0,1,2,3 or cpu')
     parser.add_argument('--single-cls', action='store_true', help='treat as single-class dataset')
     parser.add_argument('--augment', action='store_true', help='augmented inference')
@@ -328,6 +331,7 @@ if __name__ == '__main__':
              opt.verbose,
              save_txt=opt.save_txt,
              save_conf=opt.save_conf,
+             plots=false
              )
 
     elif opt.task == 'study':  # run over a range of settings and save/plot

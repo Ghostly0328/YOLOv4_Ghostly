@@ -44,7 +44,7 @@ except ImportError:
 
 def train(hyp, opt, device, tb_writer=None, wandb=None):
     logger.info(f'Hyperparameters {hyp}')
-    save_dir, epochs, batch_size, total_batch_size, weights, rank ,drive_backup = \
+    save_dir, epochs, batch_size, total_batch_size, weights, rank , drive_backup= \
         Path(opt.save_dir), opt.epochs, opt.batch_size, opt.total_batch_size, opt.weights, opt.global_rank, opt.drive
 
     # Directories
@@ -333,7 +333,7 @@ def train(hyp, opt, device, tb_writer=None, wandb=None):
                 ema.update_attr(model)
             final_epoch = epoch + 1 == epochs
             if not opt.notest or final_epoch:  # Calculate mAP
-                if epoch >= 3:
+                if epoch >= 5:
                     results, maps, times = test.test(opt.data,
                                                  batch_size=batch_size*2,
                                                  imgsz=imgsz_test,
@@ -430,7 +430,7 @@ def train(hyp, opt, device, tb_writer=None, wandb=None):
             
             if drive_backup:
                 import shutil
-
+                print("good????")
                 #delete BackUp folder
                 if os.path.isdir('/content/gdrive/MyDrive/Backup'):
                     shutil.rmtree('/content/gdrive/MyDrive/Backup')
@@ -471,12 +471,13 @@ if __name__ == '__main__':
 
     #python train.py --weights '' --cfg ./models/cfg/yolov4-ts.cfg --data ./data/coco.yaml --epochs 5 --device 0 --name yolov4-ts-test
 
+    torch.cuda.empty_cache()
     parser = argparse.ArgumentParser()
     parser.add_argument('--weights', type=str, default='yolov4.weights', help='initial weights path')
     parser.add_argument('--cfg', type=str, default='', help='model.yaml path')
     parser.add_argument('--data', type=str, default='data/coco.yaml', help='data.yaml path')
-    parser.add_argument('--hyp', type=str, default='data/hyp.scratch.yaml', help='hyperparameters path')
-    parser.add_argument('--epochs', type=int, default=300) #300
+    parser.add_argument('--hyp', type=str, default='data/hyp.scratch.yaml', help='hyperparameters path')    #https://github.com/WongKinYiu/PyTorch_YOLOv4/issues/206
+    parser.add_argument('--epochs', type=int, default=400) #300
     parser.add_argument('--batch-size', type=int, default=2, help='total batch size for all GPUs')
     parser.add_argument('--img-size', nargs='+', type=int, default=[640, 640], help='[train, test] image sizes')
     parser.add_argument('--rect', action='store_true', help='rectangular training')
@@ -495,7 +496,7 @@ if __name__ == '__main__':
     parser.add_argument('--sync-bn', action='store_true', help='use SyncBatchNorm, only available in DDP mode')
     parser.add_argument('--local_rank', type=int, default=-1, help='DDP parameter, do not modify')
     parser.add_argument('--log-imgs', type=int, default=16, help='number of images for W&B logging, max 100')
-    parser.add_argument('--workers', type=int, default=24, help='maximum number of dataloader workers') #biger Gpu used higher %
+    parser.add_argument('--workers', type=int, default=16, help='maximum number of dataloader workers') #biger Gpu used higher %
     parser.add_argument('--project', default='runs/train', help='save to project/name')
     parser.add_argument('--name', default='exp', help='save to project/name')
     parser.add_argument('--exist-ok', action='store_true', help='existing project/name ok, do not increment')
@@ -516,7 +517,7 @@ if __name__ == '__main__':
         assert os.path.isfile(ckpt), 'ERROR: --resume checkpoint does not exist'
         with open(Path(ckpt).parent.parent / 'opt.yaml') as f:
             opt = argparse.Namespace(**yaml.load(f, Loader=yaml.FullLoader))  # replace
-        opt.cfg, opt.weights, opt.resume = '', ckpt, True
+        opt.cfg, opt.weights, opt.resume = opt.cfg, ckpt, True
         logger.info('Resuming training from %s' % ckpt)
     else:
         # opt.hyp = opt.hyp or ('hyp.finetune.yaml' if opt.weights else 'hyp.scratch.yaml')
