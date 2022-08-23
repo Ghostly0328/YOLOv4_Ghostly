@@ -57,7 +57,7 @@ def ap_per_class(tp, conf, pred_cls, target_cls, plot=False, fname='precision-re
     # Sort by objectness
     i = np.argsort(-conf)
     tp, conf, pred_cls = tp[i], conf[i], pred_cls[i]
-
+    #print(tp.shape[1])
     # Find unique classes
     unique_classes = np.unique(target_cls)
 
@@ -74,6 +74,8 @@ def ap_per_class(tp, conf, pred_cls, target_cls, plot=False, fname='precision-re
         if n_p == 0 or n_l == 0:
             continue
         else:
+            #TODO:修正map計算 （cocomAP, VOC mAP）
+
             # Accumulate FPs and TPs
             fpc = (1 - tp[i]).cumsum(0)
             tpc = tp[i].cumsum(0)
@@ -91,6 +93,8 @@ def ap_per_class(tp, conf, pred_cls, target_cls, plot=False, fname='precision-re
                 ap[ci, j], mpre, mrec = compute_ap(recall[:, j], precision[:, j])
                 if j == 0:
                     py.append(np.interp(px, mrec, mpre))  # precision at mAP@0.5
+
+            #print(ap)
 
     # Compute F1 score (harmonic mean of precision and recall)
     f1 = 2 * p * r / (p + r + 1e-16)
@@ -138,3 +142,44 @@ def compute_ap(recall, precision):
         ap = np.sum((mrec[i + 1] - mrec[i]) * mpre[i + 1])  # area under curve
 
     return ap, mpre, mrec
+
+def voc_ap(recall, precision, use_07_metric=True): #mrec:召回率 mpre:准确率；召回率越高，准确率越低
+    """ 
+    Source: https://blog.csdn.net/u012435142/article/details/84783368
+    ap = voc_ap(mrec, mpre, [use_07_metric])
+    Compute VOC AP given precision and recall.
+    If use_07_metric is true, uses the
+    VOC 07 11 point method (default:True).
+    """
+
+    # Append sentinel values to beginning and end
+    mrec = recall  # np.concatenate(([0.], recall, [recall[-1] + 1E-3]))
+    mpre = precision  # np.concatenate(([0.], precision, [0.]))
+
+    if use_07_metric: #Y轴查准率p,X轴召回率r,取101个点,如[r(0.0),p(0)],[r(0.1),p(1)],...,[r(1.0),p(10)],ap=(p(0)+p(1)+...+p(10))/11
+        # 101 point metric
+        ap = 0.
+        for t in np.arange(0., 1.1, 0.1):
+            if np.sum(mrec >= t) == 0: #召回率rec中大于阈值t的数量;等于0表示超过了最大召回率,对应的p设置为0
+                p = 0
+            else:
+                p = np.max(mpre[mrec >= t]) #召回率大于t时精度的最大值 ???
+            ap = ap + p / 11.
+    else:
+        # correct AP calculation
+        # first append sentinel values at the end
+        mrec = np.concatenate(([0.], mrec, [1.]))
+        mpre = np.concatenate(([0.], mpre, [0.]))
+
+        # compute the precision envelope
+        for i in range(mpre.size - 1, 0, -1):
+            mpre[i - 1] = np.maximum(mpre[i - 1], mpre[i])
+
+        # to calculate area under PR curve, look for points
+        # where X axis (recall) changes value
+        i = np.where(mrec[1:] != mrec[:-1])[0]
+
+        # and sum (\Delta recall) * mpre
+        ap = np.sum((mrec[i + 1] - mrec[i]) * mpre[i + 1]) #计算PR曲线向下包围的面积
+    return ap, mpre, mrec
+

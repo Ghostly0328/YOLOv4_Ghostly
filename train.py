@@ -3,8 +3,10 @@ import logging
 import math
 import os
 import random
+from statistics import mode
 import time
 from pathlib import Path
+from turtle import backward
 from warnings import warn
 
 import numpy as np
@@ -33,6 +35,7 @@ from utils.google_utils import attempt_download
 from utils.loss import compute_loss
 from utils.plots import plot_images, plot_labels, plot_results, plot_evolution
 from utils.torch_utils import ModelEMA, select_device, intersect_dicts, torch_distributed_zero_first
+from torch.utils.checkpoint import checkpoint_sequential
 
 logger = logging.getLogger(__name__)
 
@@ -210,7 +213,8 @@ def train(hyp, opt, device, tb_writer=None, wandb=None):
             #     check_anchors(dataset, model=model, thr=hyp['anchor_t'], imgsz=imgsz)
 
     # Model parameters
-    hyp['cls'] *= nc / 80.  # scale coco-tuned hyp['cls'] to current dataset
+    #TODO: 修正為啥是 80跟20
+    hyp['cls'] *= nc / 80.  # scale coco-tuned hyp['cls'] to current dataset （80, 20）
     model.nc = nc  # attach number of classes to model
     model.hyp = hyp  # attach hyperparameters to model
     model.gr = 1.0  # iou loss ratio (obj_loss = 1.0 or iou)
@@ -291,10 +295,13 @@ def train(hyp, opt, device, tb_writer=None, wandb=None):
                     loss *= opt.world_size  # gradient averaged between devices in DDP mode
 
             # Backward
+
+            #TODO: 查看爆顯存的原因
             scaler.scale(loss).backward()
 
             # Optimize
             if ni % accumulate == 0:
+                #scaler.unscale_(optimizer)
                 scaler.step(optimizer)  # optimizer.step
                 scaler.update()
                 optimizer.zero_grad()
@@ -470,37 +477,36 @@ def train(hyp, opt, device, tb_writer=None, wandb=None):
 if __name__ == '__main__':
 
     #python train.py --weights '' --cfg ./models/cfg/yolov4-ts.cfg --data ./data/coco.yaml --epochs 5 --device 0 --name yolov4-ts-test
-
-    torch.cuda.empty_cache()
+    #TODO: 新增註釋
     parser = argparse.ArgumentParser()
-    parser.add_argument('--weights', type=str, default='yolov4.weights', help='initial weights path')
-    parser.add_argument('--cfg', type=str, default='', help='model.yaml path')
-    parser.add_argument('--data', type=str, default='data/coco.yaml', help='data.yaml path')
+    parser.add_argument('--weights', type=str, default='yolov4.weights', help='initial weights path') #權重位置 .pt .weight
+    parser.add_argument('--cfg', type=str, default='', help='model.yaml path')  #神經網路架構
+    parser.add_argument('--data', type=str, default='data/coco.yaml', help='data.yaml path')    #資料庫種類名稱
     parser.add_argument('--hyp', type=str, default='data/hyp.scratch.yaml', help='hyperparameters path')    #https://github.com/WongKinYiu/PyTorch_YOLOv4/issues/206
-    parser.add_argument('--epochs', type=int, default=400) #300
-    parser.add_argument('--batch-size', type=int, default=2, help='total batch size for all GPUs')
-    parser.add_argument('--img-size', nargs='+', type=int, default=[640, 640], help='[train, test] image sizes')
+    parser.add_argument('--epochs', type=int, default=400) #作者說300 YOLOv4 測試400最佳 再高也可以 不過效益不高 
+    parser.add_argument('--batch-size', type=int, default=2, help='total batch size for all GPUs') #GPU Memory Size顯存佔用大小
+    parser.add_argument('--img-size', nargs='+', type=int, default=[448, 448], help='[train, test] image sizes x64') #[640 640] #640 512 448 這裡要是64的倍數
     parser.add_argument('--rect', action='store_true', help='rectangular training')
-    parser.add_argument('--resume', nargs='?', const=True, default=False, help='resume most recent training')
-    parser.add_argument('--nosave', action='store_true', help='only save final checkpoint')
-    parser.add_argument('--notest', action='store_true', help='only test final epoch')
+    parser.add_argument('--resume', nargs='?', const=True, default=False, help='resume most recent training')   #ERROR時 可以使用 來繼續訓練
+    parser.add_argument('--nosave', action='store_true', help='only save final checkpoint') #不要儲存
+    parser.add_argument('--notest', action='store_true', help='only test final epoch')  #不要測試 如果訓練初期 測試可能導致 檢測匡出現過多 會爆顯存 可以跳過測試來持續訓練
     parser.add_argument('--noautoanchor', action='store_true', help='disable autoanchor check')
     parser.add_argument('--evolve', action='store_true', help='evolve hyperparameters')
     parser.add_argument('--bucket', type=str, default='', help='gsutil bucket')
-    parser.add_argument('--cache-images', action='store_true', help='cache images for faster training if images is a little use it')
+    parser.add_argument('--cache-images', action='store_true', help='cache images for faster training if images is a little use it') #利用RAM來幫助訓練 圖片快取到RAM
     parser.add_argument('--image-weights', action='store_true', help='use weighted image selection for training')
-    parser.add_argument('--device', default='', help='cuda device, i.e. 0 or 0,1,2,3 or cpu') #choice Gpu
+    parser.add_argument('--device', default='', help='cuda device, i.e. 0 or 0,1,2,3 or cpu') #choice GPU 選擇使用的顯示卡
     parser.add_argument('--multi-scale', action='store_true', help='vary img-size +/- 50%%')
     parser.add_argument('--single-cls', action='store_true', help='train as single-class dataset')
     parser.add_argument('--adam', action='store_true', help='use torch.optim.Adam() optimizer')
     parser.add_argument('--sync-bn', action='store_true', help='use SyncBatchNorm, only available in DDP mode')
     parser.add_argument('--local_rank', type=int, default=-1, help='DDP parameter, do not modify')
-    parser.add_argument('--log-imgs', type=int, default=16, help='number of images for W&B logging, max 100')
-    parser.add_argument('--workers', type=int, default=16, help='maximum number of dataloader workers') #biger Gpu used higher %
-    parser.add_argument('--project', default='runs/train', help='save to project/name')
-    parser.add_argument('--name', default='exp', help='save to project/name')
+    parser.add_argument('--log-imgs', type=int, default=48, help='number of images for W&B logging, max 100')
+    parser.add_argument('--workers', type=int, default=12, help='maximum number of dataloader workers') #GPU Used Percent 測試最大16 RTX2070
+    parser.add_argument('--project', default='runs/train', help='save to project/name') #Save Path 除存檔案路徑
+    parser.add_argument('--name', default='exp', help='save to project/name') #Project Name 專案名稱
     parser.add_argument('--exist-ok', action='store_true', help='existing project/name ok, do not increment')
-    parser.add_argument('--drive', action='store_true', help='colab back up')
+    parser.add_argument('--drive', action='store_true', help='colab back up') #Custom Google Drive 自己加的Google雲端備份
     opt = parser.parse_args()
 
     # Set DDP variables
@@ -510,6 +516,9 @@ if __name__ == '__main__':
     set_logging(opt.global_rank)
     if opt.global_rank in [-1, 0]:
         check_git_status()
+
+    #提昇一點訓練速度   https://blog.csdn.net/qq_28660035/article/details/80688427
+    #torch.backends.cudnn.benchmark = True
 
     # Resume
     if opt.resume:  # resume an interrupted run

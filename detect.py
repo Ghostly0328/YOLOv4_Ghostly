@@ -2,6 +2,7 @@ import argparse
 import os
 import platform
 import shutil
+from statistics import mode
 import time
 from pathlib import Path
 
@@ -72,10 +73,15 @@ def detect(save_img=False):
         save_img = True
         dataset = LoadImages(source, img_size=imgsz, auto_size=64)
 
-    # Get names and colors
+    # Get names and colors 取得名稱以及顏色
     names = load_classes(names)
     colors = [[random.randint(0, 255) for _ in range(3)] for _ in range(len(names))]
 
+    # 檢查顯存大小
+    inputTensor = torch.rand(2, 2, 128, 128)
+    modelsize(model , input=inputTensor)
+    ######
+    
     # Run inference
     t0 = time.time()
     img = torch.zeros((1, 3, imgsz, imgsz), device=device)  # init img
@@ -98,7 +104,7 @@ def detect(save_img=False):
         # Apply Classifier
         if classify:
             pred = apply_classifier(pred, modelc, img, im0s)
-
+        
         # Process detections
         for i, det in enumerate(pred):  # detections per image
             if webcam:  # batch_size >= 1

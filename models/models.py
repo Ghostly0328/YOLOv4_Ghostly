@@ -3,6 +3,8 @@ from utils.layers import *
 from utils.parse_config import *
 from utils import torch_utils
 
+
+
 ONNX_EXPORT = False
 
 def create_modules(module_defs, img_size, cfg):
@@ -131,15 +133,15 @@ def create_modules(module_defs, img_size, cfg):
             else:
                 modules = maxpool
 
-        elif mdef['type'] == 'RegpPooling': #RegpPooling 接口 study: http://dx.doi.org/10.14311/nnw.2019.29.004
-            k = mdef['size']
+        elif mdef['type'] == 'Regppool': #RegpPooling 接口 study: http://dx.doi.org/10.14311/nnw.2019.29.004 line 275
+            k = mdef['size']  # kernel size
             stride = mdef['stride']
-            RegpPooling = RegpPooling2D(kernel_size=k, stride=stride, padding=(k - 1) // 2)
+            Regppool = RegpPooling2D(kernel_size= k, stride= stride, padding= (k - 1) // 2)
             if k == 2 and stride == 1:  # yolov3-tiny
                 #Not Finish
                 None
             else:
-                modules = RegpPooling
+                modules = Regppool
 
         elif mdef['type'] == 'local_avgpool':
             k = mdef['size']  # kernel size
@@ -264,7 +266,6 @@ def create_modules(module_defs, img_size, cfg):
     for i in routs:
         routs_binary[i] = True
     return module_list, routs_binary
-
 
 class YOLOLayer(nn.Module):
     def __init__(self, anchors, nc, img_size, yolo_index, layers, stride):
