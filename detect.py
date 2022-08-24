@@ -54,8 +54,9 @@ def detect(save_img=False):
         load_darknet_weights(model, weights[0])
     model.to(device).eval()
     if half:
+        model.cuda()  # to FP16
         model.half()  # to FP16
-
+        
     # Second-stage classifier
     classify = False
     if classify:
@@ -78,16 +79,19 @@ def detect(save_img=False):
     colors = [[random.randint(0, 255) for _ in range(3)] for _ in range(len(names))]
 
     # 檢查顯存大小
-    inputTensor = torch.rand(2, 2, 128, 128)
-    modelsize(model , input=inputTensor)
+    # inputTensor = torch.rand(2, 2, 128, 128)
+    # modelsize(model , input=inputTensor)
+    
     ######
     
     # Run inference
     t0 = time.time()
     img = torch.zeros((1, 3, imgsz, imgsz), device=device)  # init img
+    #_ = model(img.cuda() if half else None) if device.type != 'cpu' else None  # run once #FP16 #Add Cuda()
     _ = model(img.half() if half else img) if device.type != 'cpu' else None  # run once
     for path, img, im0s, vid_cap in dataset:
         img = torch.from_numpy(img).to(device)
+        img = img.cuda() if half else img  # uint8 to fp16/32 #Add Cuda()
         img = img.half() if half else img.float()  # uint8 to fp16/32
         img /= 255.0  # 0 - 255 to 0.0 - 1.0
         if img.ndimension() == 3:

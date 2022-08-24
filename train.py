@@ -470,13 +470,13 @@ def train(hyp, opt, device, tb_writer=None, wandb=None):
         dist.destroy_process_group()
 
     wandb.run.finish() if wandb and wandb.run else None
-    torch.cuda.empty_cache()
+    #torch.cuda.empty_cache()
     return results
 
 
 if __name__ == '__main__':
 
-    #python train.py --weights '' --cfg ./models/cfg/yolov4-ts.cfg --data ./data/coco.yaml --epochs 5 --device 0 --name yolov4-ts-test
+    #python train.py --weights '' --cfg ./models/cfg/yolov4-ts.cfg --data ./data/coco.yaml --name yolov4-ts-test
     #TODO: 新增註釋
     parser = argparse.ArgumentParser()
     parser.add_argument('--weights', type=str, default='yolov4.weights', help='initial weights path') #權重位置 .pt .weight
@@ -511,14 +511,14 @@ if __name__ == '__main__':
 
     # Set DDP variables
     opt.total_batch_size = opt.batch_size
-    opt.world_size = int(os.environ['WORLD_SIZE']) if 'WORLD_SIZE' in os.environ else 1
+    opt.world_size = int(os.environ['WORLD_SIZE']) if 'WORLD_SIZE' in os.environ else 1 #GPU Number
     opt.global_rank = int(os.environ['RANK']) if 'RANK' in os.environ else -1
     set_logging(opt.global_rank)
     if opt.global_rank in [-1, 0]:
         check_git_status()
 
     #提昇一點訓練速度   https://blog.csdn.net/qq_28660035/article/details/80688427
-    #torch.backends.cudnn.benchmark = True
+    torch.backends.cudnn.benchmark = True
 
     # Resume
     if opt.resume:  # resume an interrupted run

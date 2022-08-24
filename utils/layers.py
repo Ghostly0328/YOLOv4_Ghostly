@@ -454,6 +454,7 @@ class RegpPooling2D(nn.Module): # 應用層 http://dx.doi.org/10.14311/nnw.2019.
         _CompareSamllX = None
         counterSum = torch.sum(counter, (4,5)) - 1
 
+        #TODO:修改不須再進行移動
         counterSum = counterSum.to(device=torch.device('cuda' if torch.cuda.is_available() else 'cpu'))
         maxCounter = maxCounter.to(device=torch.device('cuda' if torch.cuda.is_available() else 'cpu'))
 
@@ -489,5 +490,5 @@ class RegpPooling2D(nn.Module): # 應用層 http://dx.doi.org/10.14311/nnw.2019.
         return array
 
     def ChangeType(self, Before): #變更數值型態
-        After = Before.type(torch.float)
+        After = Before.type(torch.half) #float
         return After
