@@ -74,8 +74,7 @@ def ap_per_class(tp, conf, pred_cls, target_cls, plot=False, fname='precision-re
         if n_p == 0 or n_l == 0:
             continue
         else:
-            #TODO:修正map計算 （cocomAP, VOC mAP）
-
+            
             # Accumulate FPs and TPs
             fpc = (1 - tp[i]).cumsum(0)
             tpc = tp[i].cumsum(0)
