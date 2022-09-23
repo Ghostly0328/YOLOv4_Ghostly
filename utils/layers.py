@@ -453,11 +453,8 @@ class RegpPooling2D(nn.Module): # 應用層 http://dx.doi.org/10.14311/nnw.2019.
     
     def _PoolingCount(self, _SamllX, p, maxCounter):
 
-        _CompareSamllX = self._padding6D(_SamllX)         
-        TFcounter = torch.isclose(_SamllX, _CompareSamllX, rtol=5e-02, atol= 5e-03).cuda() #isclose 範圍調整    #https://runebook.dev/zh-CN/docs/pytorch/generated/torch.isclose         
-        NumberCounter = torch.sum(TFcounter, (4,5)).cuda().type(torch.half) - 1
-
-        #valA = _SamllX[:,:,:,:,1,1]     
+        _CompareSamllX = self._padding6D(_SamllX)     #複製矩陣
+        NumberCounter = self.CompareTF(_SamllX, _CompareSamllX)   
 
         #Calculate
         ##counterSum > maxCounter
@@ -496,3 +493,10 @@ class RegpPooling2D(nn.Module): # 應用層 http://dx.doi.org/10.14311/nnw.2019.
         else:
             padding = self.padding
         return padding
+
+    def CompareTF(self, arrayA, arrayB): #比較
+        
+        TFcounter = torch.isclose(arrayA, arrayB, rtol=3e-01, atol= 0).cuda() #isclose 範圍調整    #https://runebook.dev/zh-CN/docs/pytorch/generated/torch.isclose
+        NumberCounter = torch.sum(TFcounter, (4,5)).cuda().type(torch.half) - 1
+
+        return NumberCounter
