@@ -136,8 +136,10 @@ def create_modules(module_defs, img_size, cfg):
         elif mdef['type'] == 'Regppool': #RegpPooling 接口 study: http://dx.doi.org/10.14311/nnw.2019.29.004 line 275
             k = mdef['size']  # kernel size
             stride = mdef['stride']
-            Regppool = RegpPooling2D(kernel_size= k, stride= stride, padding= (k - 1) // 2)
+            isclose = mdef['isclose']
             
+            Regppool = RegpPooling2D(kernel_size= k, stride= stride, padding= (k - 1) // 2)
+    
             modules = Regppool
             # if k == 2 and stride == 1:  # yolov3-tiny
             #     #Not Finish
