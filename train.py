@@ -213,7 +213,6 @@ def train(hyp, opt, device, tb_writer=None, wandb=None):
             #     check_anchors(dataset, model=model, thr=hyp['anchor_t'], imgsz=imgsz)
 
     # Model parameters
-    #TODO: 修正cls 80跟20 COCO VOC
     hyp['cls'] *= nc / 80.  # scale coco-tuned hyp['cls'] to current dataset （80, 20）
     model.nc = nc  # attach number of classes to model
     model.hyp = hyp  # attach hyperparameters to model
@@ -299,7 +298,7 @@ def train(hyp, opt, device, tb_writer=None, wandb=None):
                     loss *= opt.world_size  # gradient averaged between devices in DDP mode
 
             # Backward
-            #TODO: 查看爆顯存的原因
+            #TODO: 查看速度原因: 可能是box太大導致運算速度下降
 
             # Scales loss.  Calls backward() on scaled loss to create scaled gradients.
             # Backward passes under autocast are not recommended.

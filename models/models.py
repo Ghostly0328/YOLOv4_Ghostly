@@ -137,11 +137,13 @@ def create_modules(module_defs, img_size, cfg):
             k = mdef['size']  # kernel size
             stride = mdef['stride']
             Regppool = RegpPooling2D(kernel_size= k, stride= stride, padding= (k - 1) // 2)
-            if k == 2 and stride == 1:  # yolov3-tiny
-                #Not Finish
-                None
-            else:
-                modules = Regppool
+            
+            modules = Regppool
+            # if k == 2 and stride == 1:  # yolov3-tiny
+            #     #Not Finish
+            #     None
+            # else:
+            #     modules = Regppool
 
         elif mdef['type'] == 'local_avgpool':
             k = mdef['size']  # kernel size

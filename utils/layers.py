@@ -369,134 +369,194 @@ class ScaleSpatial(nn.Module):  # weighted sum of 2 or more layers https://arxiv
         return x * a
 
 ##0831
+# class RegpPooling2D(nn.Module): # 應用層 http://dx.doi.org/10.14311/nnw.2019.29.004
+#     def __init__(self, kernel_size = 3, stride = 1, padding = 0, same = False, CountTime = False):
+#         super(RegpPooling2D, self).__init__()
+#         self.k = _pair(kernel_size)
+#         self.stride = _pair(stride)
+#         self.padding = _quadruple(padding)
+#         # self.same = same    #??
+#         self.CountTime = CountTime #時間計算
+    
+#     def forward(self, x):
+        
+#         #Count Time
+#         if self.CountTime:
+#             t0 = time.time()
+        
+#         #情況枚舉
+#         x = self._CaseEnumeration(x)
+        
+#         #Count
+#         x = self._RegpPoooling(x)
+
+#         #Count Time
+#         if self.CountTime:
+#             t1 = time.time()
+#             print('Cost Time:' + str(t1 - t0))
+
+#         return x
+    
+#     def backward(self, d_loss):
+#         dx = np.zeros_like(self.x)
+#         for i in range(self.out_height):
+#             for j in range(self.out_width):
+#                 start_i = i * self.stride
+#                 start_j = j * self.stride
+#                 end_i = start_i + self.w_height
+#                 end_j = start_j + self.w_width
+#                 index = np.unravel_index(self.arg_max[i, j], self.kernel_size)
+#                 dx[start_i:end_i, start_j:end_j][index] = d_loss[i, j] #
+#         return dx
+
+#     def _RegpPoooling(self, x):
+
+#         #y = x.contiguous().view(x.size()[:4] + (-1,)) #ReShape 變成一行
+#         #maxValues, max_indices = torch.max(y, dim=-1) #取得最大值以及位置
+#         #meanValues = torch.mean(y, dim=-1) #取得最小值以及位置
+
+#         #初始數值
+#         maxCounter = torch.zeros(x.shape[0],x.shape[1], x.shape[2], x.shape[3]).cuda().type(torch.half)
+#         p = torch.zeros(x.shape[0],x.shape[1], x.shape[2], x.shape[3]).cuda().type(torch.half)
+
+#         #進行填充開始單個計算數值
+#         x = F.pad(x, (1,1,1,1),value=0).cuda()  #外匡填充 0 進行計算 方便對數值比較   
+#         x = x.unfold(4, 3, self.stride[0]).unfold(5, 3, self.stride[1]) #進行附近數字檢查 大小為3 步長1 9*9  
+#         #x = [1, 1, 4, 4, 3, 3, 3, 3] 一張圖片分成3*3小框框再進行3*3的單數字比對
+
+        
+#         for n_i in range(x.shape[4]): #Equal to k size
+#             for n_j in range(x.shape[5]):
+                
+#                 p ,maxCounter = self._PoolingCount(x[:,:,:,:,n_i,n_j,:,:], p, maxCounter)
+
+#                 #print(NumberCount)
+#                 #torch.cuda.empty_cache() #拖累運算速度
+
+#         #Print GPU Mem
+#         #mem = '%.3gG' % (torch.cuda.memory_reserved() / 1E9 if torch.cuda.is_available() else 0)  # (GB)
+#         #print('GPU Memory Reserved: ' + mem)
+
+#         #print(_p, _maxCounter)
+#         return p
+
+#     def _CaseEnumeration(self, x):
+
+#         #原始圖片進行reflect填充      
+#         x = F.pad(x, self._padding(x), mode='reflect').cuda()
+
+#         #根據stride大小進行狀況枚舉
+#         x = x.unfold(2, self.k[0], self.stride[0]).unfold(3, self.k[1], self.stride[1]) #sliding windows 枚舉全部狀況
+
+#         return x
+
+    
+#     def _PoolingCount(self, _SamllX, p, maxCounter):
+
+#         _CompareSamllX = self._padding6D(_SamllX)     #複製矩陣
+#         NumberCounter = self.CompareTF(_SamllX, _CompareSamllX)   
+
+#         #Calculate
+#         ##counterSum > maxCounter
+#         p = torch.where(NumberCounter > maxCounter, _CompareSamllX[:,:,:,:,1,1], p)
+#         maxCounter = torch.where(NumberCounter > maxCounter, NumberCounter, maxCounter)
+
+#         ##counterSum == maxCounter
+#         p = torch.where(NumberCounter == maxCounter, (_CompareSamllX[:,:,:,:,1,1]+ p)/2, p)
+
+#         return p,maxCounter
+
+#     def _padding6D(self, array): #進行6D維度擴展 複製成相同數字
+#         _targetSize = [array.shape[0],array.shape[1],array.shape[2],array.shape[3],1,1] #降低維度
+#         array = torch.reshape(array[:,:,:,:,1,1], _targetSize)
+
+#         array = torch.cat((array, array,array), 4) #複製
+#         array = torch.cat((array, array,array), 5) #複製
+#         return array
+    
+#     def _padding(self, x): #填充
+#         # if self.same:
+#         #     ih, iw = x.size()[2:]
+#         #     if ih % self.stride[0] == 0:
+#         #         ph = max(self.k[0] - self.stride[0], 0)
+#         #     else:
+#         #         ph = max(self.k[0] - (ih % self.stride[0]), 0)
+#         #     if iw % self.stride[1] == 0:
+#         #         pw = max(self.k[1] - self.stride[1], 0)
+#         #     else:
+#         #         pw = max(self.k[1] - (iw % self.stride[1]), 0)
+#         #     pl = pw // 2
+#         #     pr = pw - pl
+#         #     pt = ph // 2
+#         #     pb = ph - pt
+#         #     padding = (pl, pr, pt, pb)
+#         # else:
+#         #     padding = self.padding
+#         padding = self.padding
+#         return padding
+
+#     def CompareTF(self, arrayA, arrayB): #比較
+        
+#         TFcounter = torch.isclose(arrayA, arrayB, rtol=30e-02, atol= 0).cuda() #isclose 範圍調整    #https://runebook.dev/zh-CN/docs/pytorch/generated/torch.isclose
+#         NumberCounter = torch.sum(TFcounter, (4,5)).cuda().type(torch.half) - 1
+
+#         return NumberCounter
+
+#Faster?
 class RegpPooling2D(nn.Module): # 應用層 http://dx.doi.org/10.14311/nnw.2019.29.004
-    def __init__(self, kernel_size = 3, stride = 1, padding = 0, same = False, CountTime = False):
+    def __init__(self, kernel_size = 3, stride = 1, padding = 0):
         super(RegpPooling2D, self).__init__()
         self.k = _pair(kernel_size)
         self.stride = _pair(stride)
         self.padding = _quadruple(padding)
-        self.same = same    #??
-        self.CountTime = CountTime #時間計算
     
     def forward(self, x):
-        
-        #Count Time
-        if self.CountTime:
-            t0 = time.time()
-        
-        #情況枚舉
-        x = self._CaseEnumeration(x)
-        
-        #Count
+        # 情況枚舉
+        print(x)
+        x = self._CaseEnumeration(x) 
+        # Count
         x = self._RegpPoooling(x)
-
-        #Count Time
-        if self.CountTime:
-            t1 = time.time()
-            print('Cost Time:' + str(t1 - t0))
-
         return x
-    
-    def backward(self, d_loss):
-        dx = np.zeros_like(self.x)
-        for i in range(self.out_height):
-            for j in range(self.out_width):
-                start_i = i * self.stride
-                start_j = j * self.stride
-                end_i = start_i + self.w_height
-                end_j = start_j + self.w_width
-                index = np.unravel_index(self.arg_max[i, j], self.kernel_size)
-                dx[start_i:end_i, start_j:end_j][index] = d_loss[i, j] #
-        return dx
 
     def _RegpPoooling(self, x):
 
-        #y = x.contiguous().view(x.size()[:4] + (-1,)) #ReShape 變成一行
-        #maxValues, max_indices = torch.max(y, dim=-1) #取得最大值以及位置
-        #meanValues = torch.mean(y, dim=-1) #取得最小值以及位置
+        # y = x.contiguous().view(x.size()[:4] + (-1,)) #ReShape 變成一行
+        # maxValues, max_indices = torch.max(y, dim=-1) #取得最大值以及位置
+        # meanValues = torch.mean(y, dim=-1) #取得最小值以及位置
 
-        #初始數值
-        maxCounter = torch.zeros(x.shape[0],x.shape[1], x.shape[2], x.shape[3]).cuda().type(torch.half)
-        p = torch.zeros(x.shape[0],x.shape[1], x.shape[2], x.shape[3]).cuda().type(torch.half)
-
-        #進行填充開始單個計算數值
-        x = F.pad(x, (1,1,1,1),value=0).cuda()  #外匡填充 0 進行計算 方便對數值比較   
-        x = x.unfold(4, 3, self.stride[0]).unfold(5, 3, self.stride[1]) #進行附近數字檢查 大小為3 步長1 9*9  
-        #x = [1, 1, 4, 4, 3, 3, 3, 3] 一張圖片分成3*3小框框再進行3*3的單數字比對
-
+        # 初始數值
+        maxCounter = torch.zeros_like(x[:,:,:,:,0,0], dtype=torch.half)
+        p = torch.zeros_like(x[:,:,:,:,0,0], dtype=torch.half)
         
-        for n_i in range(x.shape[4]): #Equal to k size
+        # 進行填充開始單個計算數值
+        x = F.pad(x, (1,1,1,1),value=0).cuda()  #外匡填充 0 進行計算 方便對數值比較 
+        x = x.unfold(4, 3, self.stride[0]).unfold(5, 3, self.stride[1]) #進行附近數字檢查 大小為3 步長1 9*9  
+        array = x[:,:,:,:,:,:,1,1].unsqueeze(-1).unsqueeze(-1).repeat(1,1,1,1,1,1,3,3)
+        array = torch.isclose(x, array, rtol=30e-02, atol= 0) #isclose 範圍調整    #https://runebook.dev/zh-CN/docs/pytorch/generated/torch.isclose
+        array = torch.sum(array, (6,7), dtype=torch.half) - 1
+
+        for n_i in range(x.shape[4]):
             for n_j in range(x.shape[5]):
-                
-                p ,maxCounter = self._PoolingCount(x[:,:,:,:,n_i,n_j,:,:], p, maxCounter)
-
-                #print(NumberCount)
-                #torch.cuda.empty_cache() #拖累運算速度
-
-        #Print GPU Mem
-        #mem = '%.3gG' % (torch.cuda.memory_reserved() / 1E9 if torch.cuda.is_available() else 0)  # (GB)
-        #print('GPU Memory Reserved: ' + mem)
-
-        #print(_p, _maxCounter)
+                p ,maxCounter = self._PoolingCount(x[:,:,:,:,n_i,n_j,:,:], array[:,:,:,:,n_i,n_j], p, maxCounter)
         return p
 
     def _CaseEnumeration(self, x):
 
         #原始圖片進行reflect填充      
-        x = F.pad(x, self._padding(x), mode='reflect').cuda()
-
+        x = F.pad(x, self.padding, mode='reflect').cuda()
         #根據stride大小進行狀況枚舉
         x = x.unfold(2, self.k[0], self.stride[0]).unfold(3, self.k[1], self.stride[1]) #sliding windows 枚舉全部狀況
 
         return x
 
     
-    def _PoolingCount(self, _SamllX, p, maxCounter):
-
-        _CompareSamllX = self._padding6D(_SamllX)     #複製矩陣
-        NumberCounter = self.CompareTF(_SamllX, _CompareSamllX)   
-
+    def _PoolingCount(self, input, TFcount, p, maxCounter):
         #Calculate
-        ##counterSum > maxCounter
-        p = torch.where(NumberCounter > maxCounter, _CompareSamllX[:,:,:,:,1,1], p)
-        maxCounter = torch.where(NumberCounter > maxCounter, NumberCounter, maxCounter)
+        gt = torch.gt(TFcount, maxCounter)
+        eq = torch.eq(TFcount, maxCounter)
 
-        ##counterSum == maxCounter
-        p = torch.where(NumberCounter == maxCounter, (_CompareSamllX[:,:,:,:,1,1]+ p)/2, p)
+        p = torch.where(eq, (input[:,:,:,:,1,1]+ p)/2, p)
+        p = torch.where(gt, input[:,:,:,:,1,1], p)
+        maxCounter = torch.where(gt, TFcount, maxCounter)
 
         return p,maxCounter
-
-    def _padding6D(self, array): #進行6D維度擴展 複製成相同數字
-        _targetSize = [array.shape[0],array.shape[1],array.shape[2],array.shape[3],1,1] #降低維度
-        array = torch.reshape(array[:,:,:,:,1,1], _targetSize)
-
-        array = torch.cat((array, array,array), 4) #複製
-        array = torch.cat((array, array,array), 5) #複製
-        return array
-    
-    def _padding(self, x): #填充
-        if self.same:
-            ih, iw = x.size()[2:]
-            if ih % self.stride[0] == 0:
-                ph = max(self.k[0] - self.stride[0], 0)
-            else:
-                ph = max(self.k[0] - (ih % self.stride[0]), 0)
-            if iw % self.stride[1] == 0:
-                pw = max(self.k[1] - self.stride[1], 0)
-            else:
-                pw = max(self.k[1] - (iw % self.stride[1]), 0)
-            pl = pw // 2
-            pr = pw - pl
-            pt = ph // 2
-            pb = ph - pt
-            padding = (pl, pr, pt, pb)
-        else:
-            padding = self.padding
-        return padding
-
-    def CompareTF(self, arrayA, arrayB): #比較
-        
-        TFcounter = torch.isclose(arrayA, arrayB, rtol=3e-01, atol= 0).cuda() #isclose 範圍調整    #https://runebook.dev/zh-CN/docs/pytorch/generated/torch.isclose
-        NumberCounter = torch.sum(TFcounter, (4,5)).cuda().type(torch.half) - 1
-
-        return NumberCounter
