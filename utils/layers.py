@@ -368,22 +368,15 @@ class ScaleSpatial(nn.Module):  # weighted sum of 2 or more layers https://arxiv
         a = outputs[self.layers[0]]
         return x * a
 
-##0831
 class RegpPooling2D(nn.Module): # 應用層 http://dx.doi.org/10.14311/nnw.2019.29.004
-    def __init__(self, kernel_size = 3, stride = 1, padding = 0,isclose = 30e-02,  same = False, CountTime = False):
+    def __init__(self, kernel_size = 3, stride = 1, padding = 0,isclose = 30e-02,  same = False):
         super(RegpPooling2D, self).__init__()
         self.k = _pair(kernel_size)
         self.stride = _pair(stride)
         self.padding = _quadruple(padding)
         self.isclose = isclose
-        # self.same = same    #??
-        self.CountTime = CountTime #時間計算
     
     def forward(self, x):
-        
-        #Count Time
-        if self.CountTime:
-            t0 = time.time()
         
         #情況枚舉
         x = self._CaseEnumeration(x)
@@ -391,30 +384,9 @@ class RegpPooling2D(nn.Module): # 應用層 http://dx.doi.org/10.14311/nnw.2019.
         #Count
         x = self._RegpPoooling(x)
 
-        #Count Time
-        if self.CountTime:
-            t1 = time.time()
-            print('Cost Time:' + str(t1 - t0))
-
         return x
-    
-    def backward(self, d_loss):
-        dx = np.zeros_like(self.x)
-        for i in range(self.out_height):
-            for j in range(self.out_width):
-                start_i = i * self.stride
-                start_j = j * self.stride
-                end_i = start_i + self.w_height
-                end_j = start_j + self.w_width
-                index = np.unravel_index(self.arg_max[i, j], self.kernel_size)
-                dx[start_i:end_i, start_j:end_j][index] = d_loss[i, j] #
-        return dx
 
     def _RegpPoooling(self, x):
-
-        #y = x.contiguous().view(x.size()[:4] + (-1,)) #ReShape 變成一行
-        #maxValues, max_indices = torch.max(y, dim=-1) #取得最大值以及位置
-        #meanValues = torch.mean(y, dim=-1) #取得最小值以及位置
 
         #初始數值
         maxCounter = torch.zeros(x.shape[0],x.shape[1], x.shape[2], x.shape[3]).cuda().type(torch.half)
@@ -427,24 +399,14 @@ class RegpPooling2D(nn.Module): # 應用層 http://dx.doi.org/10.14311/nnw.2019.
 
         
         for n_i in range(x.shape[4]): #Equal to k size
-            for n_j in range(x.shape[5]):
-                
+            for n_j in range(x.shape[5]):          
                 p ,maxCounter = self._PoolingCount(x[:,:,:,:,n_i,n_j,:,:], p, maxCounter)
-
-                #print(NumberCount)
-                #torch.cuda.empty_cache() #拖累運算速度
-
-        #Print GPU Mem
-        #mem = '%.3gG' % (torch.cuda.memory_reserved() / 1E9 if torch.cuda.is_available() else 0)  # (GB)
-        #print('GPU Memory Reserved: ' + mem)
-
-        #print(_p, _maxCounter)
         return p
 
     def _CaseEnumeration(self, x):
 
         #原始圖片進行reflect填充      
-        x = F.pad(x, self._padding(x), mode='reflect').cuda()
+        x = F.pad(x, self.padding, mode='reflect').cuda()
 
         #根據stride大小進行狀況枚舉
         x = x.unfold(2, self.k[0], self.stride[0]).unfold(3, self.k[1], self.stride[1]) #sliding windows 枚舉全部狀況
@@ -474,89 +436,59 @@ class RegpPooling2D(nn.Module): # 應用層 http://dx.doi.org/10.14311/nnw.2019.
         array = torch.cat((array, array,array), 4) #複製
         array = torch.cat((array, array,array), 5) #複製
         return array
-    
-    def _padding(self, x): #填充
-        # if self.same:
-        #     ih, iw = x.size()[2:]
-        #     if ih % self.stride[0] == 0:
-        #         ph = max(self.k[0] - self.stride[0], 0)
-        #     else:
-        #         ph = max(self.k[0] - (ih % self.stride[0]), 0)
-        #     if iw % self.stride[1] == 0:
-        #         pw = max(self.k[1] - self.stride[1], 0)
-        #     else:
-        #         pw = max(self.k[1] - (iw % self.stride[1]), 0)
-        #     pl = pw // 2
-        #     pr = pw - pl
-        #     pt = ph // 2
-        #     pb = ph - pt
-        #     padding = (pl, pr, pt, pb)
-        # else:
-        #     padding = self.padding
-        padding = self.padding
-        return padding
 
     def CompareTF(self, arrayA, arrayB): #比較
-        
-        TFcounter = torch.isclose(arrayA, arrayB, rtol=self.isclose, atol= 0).cuda() #isclose 範圍調整    #https://runebook.dev/zh-CN/docs/pytorch/generated/torch.isclose
+        # print(self.isclose)
+        TFcounter = torch.isclose(arrayA, arrayB, rtol=self.isclose, atol= 0).cuda()
         NumberCounter = torch.sum(TFcounter, (4,5)).cuda().type(torch.half) - 1
 
         return NumberCounter
 
-#Faster?
-# class RegpPooling2D(nn.Module): # 應用層 http://dx.doi.org/10.14311/nnw.2019.29.004
-#     def __init__(self, kernel_size = 3, stride = 1, padding = 0):
-#         super(RegpPooling2D, self).__init__()
-#         self.k = _pair(kernel_size)
-#         self.stride = _pair(stride)
-#         self.padding = _quadruple(padding)
+class RegMean2D(nn.Module): # SelfMake
+    def __init__(self, kernel_size = 3, stride = 1, padding = 0, isclose = 30e-02):
+        super(RegMean2D, self).__init__()
+        self.k = _pair(kernel_size)
+        self.stride = _pair(stride)
+        self.padding = _quadruple(padding)
+        self.isclose = isclose
     
-#     def forward(self, x):
-#         # 情況枚舉
-#         x = self._CaseEnumeration(x) 
-#         # Count
-#         x = self._RegpPoooling(x)
-#         return x
+    def forward(self, x):
 
-#     def _RegpPoooling(self, x):
+        # 情況枚舉
+        x = self._CaseEnumeration(x) 
+        # Count
+        x = self._RegMean(x)
+        return x
 
-#         # y = x.contiguous().view(x.size()[:4] + (-1,)) #ReShape 變成一行
-#         # maxValues, max_indices = torch.max(y, dim=-1) #取得最大值以及位置
-#         # meanValues = torch.mean(y, dim=-1) #取得最小值以及位置
+    def _RegMean(self, x):     
 
-#         # 初始數值
-#         maxCounter = torch.zeros_like(x[:,:,:,:,0,0], dtype=torch.half)
-#         p = torch.zeros_like(x[:,:,:,:,0,0], dtype=torch.half)
+        # 進行填充開始單個計算數值
+        x = F.pad(x, (1,1,1,1),value=0).cuda()  # 外匡填充 0 進行計算 方便對數值比較 
+        x = x.unfold(4, 3, self.stride[0]).unfold(5, 3, self.stride[1]) # 進行附近數字檢查 大小為3 步長1 9*9  
+
+        array = x[:,:,:,:,:,:,1,1].unsqueeze(-1).unsqueeze(-1).repeat(1,1,1,1,1,1,3,3)
+        # print(self.isclose)
+        array = torch.isclose(x, array, rtol=self.isclose, atol= 0)
+        array = torch.sum(array, (6,7), dtype=torch.half) - 1
+        array = array.view(array.size()[:4] + (-1,))
+        maxNumber_array,_= torch.max(array, dim= -1, keepdim=True)
+        x = x[:,:,:,:,:,:,1,1]
+        x = x.contiguous().view(x.size()[:4] + (-1,))
         
-#         # 進行填充開始單個計算數值
-#         x = F.pad(x, (1,1,1,1),value=0).cuda()  #外匡填充 0 進行計算 方便對數值比較 
-#         x = x.unfold(4, 3, self.stride[0]).unfold(5, 3, self.stride[1]) #進行附近數字檢查 大小為3 步長1 9*9  
-#         array = x[:,:,:,:,:,:,1,1].unsqueeze(-1).unsqueeze(-1).repeat(1,1,1,1,1,1,3,3)
-#         array = torch.isclose(x, array, rtol=30e-02, atol= 0) #isclose 範圍調整    #https://runebook.dev/zh-CN/docs/pytorch/generated/torch.isclose
-#         array = torch.sum(array, (6,7), dtype=torch.half) - 1
+        array = torch.eq(array, maxNumber_array)
+        zero = torch.zeros_like(x, dtype=torch.half)
+        x = torch.where(array, x, zero)
 
-#         for n_i in range(x.shape[4]):
-#             for n_j in range(x.shape[5]):
-#                 p ,maxCounter = self._PoolingCount(x[:,:,:,:,n_i,n_j,:,:], array[:,:,:,:,n_i,n_j], p, maxCounter)
-#         return p
+        array = torch.sum(array, -1, dtype=torch.half)
+        x = torch.sum(x, dim = -1) / array
+        
+        return x
 
-#     def _CaseEnumeration(self, x):
+    def _CaseEnumeration(self, x):
 
-#         #原始圖片進行reflect填充      
-#         x = F.pad(x, self.padding, mode='reflect').cuda()
-#         #根據stride大小進行狀況枚舉
-#         x = x.unfold(2, self.k[0], self.stride[0]).unfold(3, self.k[1], self.stride[1]) #sliding windows 枚舉全部狀況
+        #原始圖片進行reflect填充      
+        x = F.pad(x, self.padding, mode='reflect').cuda()
+        #根據stride大小進行狀況枚舉
+        x = x.unfold(2, self.k[0], self.stride[0]).unfold(3, self.k[1], self.stride[1]) #sliding windows 枚舉全部狀況
 
-#         return x
-
-    
-#     def _PoolingCount(self, input, TFcount, p, maxCounter):
-#         #Calculate
-#         gt = torch.gt(TFcount, maxCounter)
-#         eq = torch.eq(TFcount, maxCounter)
-
-#         p = torch.where(eq, (input[:,:,:,:,1,1]+ p)/2, p)
-#         p = torch.where(gt, input[:,:,:,:,1,1], p)
-#         maxCounter = torch.where(gt, TFcount, maxCounter)
-
-#         return p,maxCounter
+        return x

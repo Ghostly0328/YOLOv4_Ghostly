@@ -133,19 +133,21 @@ def create_modules(module_defs, img_size, cfg):
             else:
                 modules = maxpool
 
-        elif mdef['type'] == 'Regppool': #RegpPooling 接口 study: http://dx.doi.org/10.14311/nnw.2019.29.004 line 275
+        elif mdef['type'] == 'Regppool': # RegpPooling site: http://dx.doi.org/10.14311/nnw.2019.29.004 line 275
             k = mdef['size']  # kernel size
             stride = mdef['stride']
-            isclose = mdef['isclose']
-            
-            Regppool = RegpPooling2D(kernel_size= k, stride= stride, padding= (k - 1) // 2)
-    
+            isclose = float(mdef['isclose'])    # isclose range [0,1]
+
+            Regppool = RegpPooling2D(kernel_size= k, stride= stride, padding= (k - 1) // 2, isclose = isclose)
             modules = Regppool
-            # if k == 2 and stride == 1:  # yolov3-tiny
-            #     #Not Finish
-            #     None
-            # else:
-            #     modules = Regppool
+
+        elif mdef['type'] == 'RegMean':
+            k = mdef['size']  # kernel size
+            stride = mdef['stride']
+            isclose = float(mdef['isclose'])    # isclose range [0,1]
+
+            RegpMean = RegMean2D(kernel_size= k, stride= stride, padding= (k - 1) // 2, isclose = isclose)
+            modules = RegpMean
 
         elif mdef['type'] == 'local_avgpool':
             k = mdef['size']  # kernel size
