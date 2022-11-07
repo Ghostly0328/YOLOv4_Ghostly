@@ -8,14 +8,13 @@ __pycache__/
 
 # YOLO Weights 排除權重檔
 *.weights
-# Without Output Video
-*.mp4
 
 # NO Output 排除輸出文件
 Output/
 data/dataset/
 runs/
 wandb/
+OutputData/
 
 # Distribution / packaging
 .Python
