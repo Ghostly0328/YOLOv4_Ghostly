@@ -66,7 +66,7 @@ def train(hyp, opt, device, tb_writer=None, wandb=None):
     # Configure
     plots = not opt.evolve  # create plots
     cuda = device.type != 'cpu'
-    init_seeds(2 + rank)
+    init_seeds(0)    # random seed 2 + rank
     with open(opt.data) as f:
         data_dict = yaml.load(f, Loader=yaml.FullLoader)  # data dict
     with torch_distributed_zero_first(rank):
@@ -244,10 +244,10 @@ def train(hyp, opt, device, tb_writer=None, wandb=None):
         # Update image weights (optional)
         if opt.image_weights:
             # Generate indices
-            if rank in [-1, 0]:
-                cw = model.class_weights.cpu().numpy() * (1 - maps) ** 2  # class weights
-                iw = labels_to_image_weights(dataset.labels, nc=nc, class_weights=cw)  # image weights
-                dataset.indices = random.choices(range(dataset.n), weights=iw, k=dataset.n)  # rand weighted idx
+            # if rank in [-1, 0]:
+            #     cw = model.class_weights.cpu().numpy() * (1 - maps) ** 2  # class weights
+            #     iw = labels_to_image_weights(dataset.labels, nc=nc, class_weights=cw)  # image weights
+            # dataset.indices = random.choices(range(dataset.n), weights=iw, k=dataset.n)  # rand weighted idx
             # Broadcast if DDP
             if rank != -1:
                 indices = (torch.tensor(dataset.indices) if rank == 0 else torch.zeros(dataset.n)).int()
@@ -298,7 +298,6 @@ def train(hyp, opt, device, tb_writer=None, wandb=None):
                     loss *= opt.world_size  # gradient averaged between devices in DDP mode
 
             # Backward
-            #TODO: 查看速度原因: 可能是box太大導致運算速度下降
 
             # Scales loss.  Calls backward() on scaled loss to create scaled gradients.
             # Backward passes under autocast are not recommended.
@@ -346,7 +345,7 @@ def train(hyp, opt, device, tb_writer=None, wandb=None):
                 ema.update_attr(model)
             final_epoch = epoch + 1 == epochs
             if not opt.notest or final_epoch:  # Calculate mAP
-                if epoch >= 5:
+                if epoch >= 10:
                     results, maps, times = test.test(opt.data,
                                                  batch_size=batch_size*2, #batch_size*2
                                                  imgsz=imgsz_test,
@@ -368,12 +367,18 @@ def train(hyp, opt, device, tb_writer=None, wandb=None):
                     'metrics/precision', 'metrics/recall', 'metrics/mAP_0.5', 'metrics/mAP_0.5:0.95',
                     'val/box_loss', 'val/obj_loss', 'val/cls_loss',  # val loss
                     'x/lr0', 'x/lr1', 'x/lr2']  # params
+            
+            # Step Bug Fix
+            if wandb:
+                wandb_log_dict = {}
             for x, tag in zip(list(mloss[:-1]) + list(results) + lr, tags):
                 if tb_writer:
                     tb_writer.add_scalar(tag, x, epoch)  # tensorboard
                 if wandb:
-                    wandb.log({tag: x})  # W&B
-
+                    wandb_log_dict[tag] = x                   
+            if wandb:
+                wandb.log(wandb_log_dict)  # W&B
+            
             # Update best mAP
             fi = fitness(np.array(results).reshape(1, -1))  # weighted combination of [P, R, mAP@.5, mAP@.5-.95]
             fi_p = fitness_p(np.array(results).reshape(1, -1))  # weighted combination of [P, R, mAP@.5, mAP@.5-.95]
@@ -503,7 +508,7 @@ if __name__ == '__main__':
     parser.add_argument('--device', default='', help='cuda device, i.e. 0 or 0,1,2,3 or cpu')       #選擇使用的顯示卡     choice GPU 
     parser.add_argument('--multi-scale', action='store_true', help='vary img-size +/- 50%%')        #更多圖片變化  Random vary img size #待測-----
     parser.add_argument('--single-cls', action='store_true', help='train as single-class dataset')  #單種類訓練    Train single class on dataset
-    parser.add_argument('--adam', action='store_true', help='use torch.optim.Adam() optimizer')     #優化算法   Site: https://blog.csdn.net/KGzhang/article/details/77479737 #待測-----
+    parser.add_argument('--adam', action='store_true', help='use torch.optim.Adam() optimizer')     #優化算法   Site: https://blog.csdn.net/KGzhang/article/details/77479737 #沒用
     parser.add_argument('--sync-bn', action='store_true', help='use SyncBatchNorm, only available in DDP mode') #單機多卡處理方式？    SyncBatchNorm
     parser.add_argument('--local_rank', type=int, default=-1, help='DDP parameter, do not modify')  #多機多卡、分佈式訓練的深度學習工程方法 Site: https://zhuanlan.zhihu.com/p/178402798
     parser.add_argument('--log-imgs', type=int, default=48, help='number of images for W&B logging, max 100')   #W&B上傳檔案數量
