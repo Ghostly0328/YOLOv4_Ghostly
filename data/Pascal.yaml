@@ -1,6 +1,7 @@
 #data path
 train: ./data/dataset/Pascal VOC 2007/5k.txt
 val: ./data/dataset/Pascal VOC 2007/val5k.txt
+test: ./data/dataset/Pascal VOC 2007/test5k.txt
 
 # number of classes
 nc: 20

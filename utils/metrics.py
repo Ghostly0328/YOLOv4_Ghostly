@@ -142,7 +142,7 @@ def compute_ap(recall, precision):
 
     return ap, mpre, mrec
 
-def voc_ap(recall, precision, use_07_metric=True): #mrec:召回率 mpre:准确率；召回率越高，准确率越低
+def voc_ap(recall, precision, use_07_metric=False): #mrec:召回率 mpre:准确率；召回率越高，准确率越低
     """ 
     Source: https://blog.csdn.net/u012435142/article/details/84783368
     ap = voc_ap(mrec, mpre, [use_07_metric])

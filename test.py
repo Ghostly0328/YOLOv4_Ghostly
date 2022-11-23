@@ -301,13 +301,13 @@ if __name__ == '__main__':
     parser.add_argument('--batch-size', type=int, default=2, help='size of each image batch')
     parser.add_argument('--img-size', type=int, default=640, help='inference size (pixels)')
     parser.add_argument('--conf-thres', type=float, default=0.001, help='object confidence threshold')
-    parser.add_argument('--iou-thres', type=float, default=0.65, help='IOU threshold for NMS') #0.45
-    parser.add_argument('--task', default='val', help="'val', 'test', 'study' choose in .yaml dataset")
+    parser.add_argument('--iou-thres', type=float, default=0.65, help='IOU threshold for NMS') # 0.45 0.65
+    parser.add_argument('--task', default='test', help="'val', 'test', 'study' choose in .yaml dataset")
     parser.add_argument('--device', default='', help='cuda device, i.e. 0 or 0,1,2,3 or cpu')
     parser.add_argument('--single-cls', action='store_true', help='treat as single-class dataset')
     parser.add_argument('--augment', action='store_true', help='augmented inference')
-    parser.add_argument('--verbose', action='store_true', help='report mAP by class')
-    parser.add_argument('--save-txt', action='store_true', help='save results to *.txt')
+    parser.add_argument('--verbose', action='store_true', help='report mAP by class')  # 顯示每個class的mAP
+    parser.add_argument('--save-txt', action='store_true', help='save results to *.txt')    
     parser.add_argument('--save-conf', action='store_true', help='save confidences in --save-txt labels')
     parser.add_argument('--save-json', action='store_true', help='save a cocoapi-compatible JSON results file')
     parser.add_argument('--project', default='runs/test', help='save to project/name')
