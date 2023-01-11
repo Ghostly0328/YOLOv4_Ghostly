@@ -8,13 +8,19 @@ __pycache__/
 
 # YOLO Weights 排除權重檔
 *.weights
+*.xml
 
 # NO Output 排除輸出文件
 Output/
-data/dataset/
+Result/
+
 runs/
 wandb/
 OutputData/
+
+# 排除訓練集 dataset
+dataSet/
+data/dataset/
 
 # Distribution / packaging
 .Python
