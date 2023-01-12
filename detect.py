@@ -143,6 +143,10 @@ def detect(save_img=False):
             # Print time (inference + NMS)
             print('%sDone. (%.3fs)' % (s, t2 - t1))
 
+            # Put text
+            text = Path(cfg).stem
+            cv2.putText(im0, text, (5, 35), cv2.FONT_HERSHEY_SIMPLEX,1, (200, 0, 0), 2, cv2.LINE_AA)
+
             # Stream results
             if view_img:
                 cv2.imshow(p, im0)

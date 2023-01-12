@@ -127,7 +127,7 @@ def train(hyp, opt, device, tb_writer=None, wandb=None):
     if wandb and wandb.run is None:
         opt.hyp = hyp  # add hyperparameters
         wandb_run = wandb.init(config=opt, resume="allow",
-                               project='YOLOv4' if opt.project == 'runs/train' else Path(opt.project).stem,
+                               project='YOLOv4' if opt.project == 'runs/train' else "YOLO(correct)",
                                name=save_dir.stem,
                                id=ckpt.get('wandb_id') if 'ckpt' in locals() else None)
 
@@ -345,7 +345,7 @@ def train(hyp, opt, device, tb_writer=None, wandb=None):
                 ema.update_attr(model)
             final_epoch = epoch + 1 == epochs
             if not opt.notest or final_epoch:  # Calculate mAP
-                if epoch >= 10:
+                if epoch >= 5:
                     results, maps, times = test.test(opt.data,
                                                  batch_size=batch_size*2, #batch_size*2
                                                  imgsz=imgsz_test,
@@ -487,34 +487,33 @@ def train(hyp, opt, device, tb_writer=None, wandb=None):
 
 if __name__ == '__main__':
 
-    #python train.py --weights '' --cfg ./models/cfg/yolov4-ts.cfg --data ./data/coco.yaml --name yolov4-ts-test
     parser = argparse.ArgumentParser()
-    parser.add_argument('--weights', type=str, default='', help='initial weights path')       #權重位置 .pt .weight
-    parser.add_argument('--cfg', type=str, default='models/cfg/yolov4-ts-Regp.cfg', help='model.yaml path')                      #神經網路架構
-    parser.add_argument('--data', type=str, default='data/Pascal.yaml', help='data.yaml path')        #資料庫種類名稱
-    parser.add_argument('--hyp', type=str, default='data/hyp.scratch.yaml', help='hyperparameters path')    #https://github.com/WongKinYiu/PyTorch_YOLOv4/issues/206
-    parser.add_argument('--epochs', type=int, default=400)                                          #作者說300 YOLOv4 測試400最佳 再高也可以 不過效益不高 
-    parser.add_argument('--batch-size', type=int, default=2, help='total batch size for all GPUs')  #GPU Memory Size顯存佔用大小
-    parser.add_argument('--img-size', nargs='+', type=int, default=[448, 448], help='[train, test] image sizes x64')    #[640 640] #640 512 448 這裡要是64的倍數
-    parser.add_argument('--rect', action='store_true', help='rectangular training')                 #長方形訓練 CacheImage need False   #待測-----
-    parser.add_argument('--resume', nargs='?', const=True, default=False, help='resume most recent training')           #ERROR時 可以使用 來繼續訓練
-    parser.add_argument('--nosave', action='store_true', help='only save final checkpoint')         #不要儲存
-    parser.add_argument('--notest', action='store_true', help='only test final epoch')              #不要測試 如果訓練初期 測試可能導致 檢測匡出現過多 會爆顯存 可以跳過測試來持續訓練
+    parser.add_argument('--weights', type=str, default='', help='initial weights path')                                         # 權重位置 .pt .weight (訓練時不需要，除非需要預訓練檔案)
+    parser.add_argument('--cfg', type=str, default='models/cfg/YOLOv4_VOC.cfg', help='model.yaml path')                         # 神經網路架構  .cfg
+    parser.add_argument('--data', type=str, default='data/Pascal.yaml', help='data.yaml path')                                  # 資料庫種類名稱    .yaml
+    parser.add_argument('--hyp', type=str, default='data/hyp.scratch.yaml', help='hyperparameters path')                        # hyperparameters site: https://github.com/WongKinYiu/PyTorch_YOLOv4/issues/206
+    parser.add_argument('--epochs', type=int, default=300)                                                                      # 300 or 400
+    parser.add_argument('--batch-size', type=int, default=2, help='total batch size for all GPUs')                              # GPU Memory Footprint
+    parser.add_argument('--img-size', nargs='+', type=int, default=[640, 640], help='[train, test] image sizes x64')            # [train, test] 640 512 448 x64
+    parser.add_argument('--rect', action='store_true', help='rectangular training')                                             # 長方形訓練 CacheImage need False
+    parser.add_argument('--resume', nargs='?', const=True, default=False, help='resume most recent training')                   # Resume Training
+    parser.add_argument('--nosave', action='store_true', help='only save final checkpoint')                                     # Without Save
+    parser.add_argument('--notest', action='store_true', help='only test final epoch')                                          # 不要測試 如果訓練初期 測試可能導致 檢測匡出現過多 會爆顯存 可以跳過測試來持續訓練
     parser.add_argument('--noautoanchor', action='store_true', help='disable autoanchor check')
-    parser.add_argument('--evolve', action='store_true', help='evolve hyperparameters')             #GA超參數演化       #待測-----
-    parser.add_argument('--bucket', type=str, default='', help='gsutil bucket')                     #多執行序上傳檔案 Google gsutill
-    parser.add_argument('--cache-images', action='store_true', help='cache images for faster training if images is a little use it') #利用RAM來幫助訓練 圖片快取到RAM
+    parser.add_argument('--evolve', action='store_true', help='evolve hyperparameters')                                         # GA超參數演化
+    parser.add_argument('--bucket', type=str, default='', help='gsutil bucket')                                                 # 多執行序上傳檔案 Google gsutill
+    parser.add_argument('--cache-images', action='store_true', help='cache images for faster training if images is a little use it') # 利用RAM來幫助訓練 圖片快取到RAM
     parser.add_argument('--image-weights', action='store_true', help='use weighted image selection for training')
-    parser.add_argument('--device', default='', help='cuda device, i.e. 0 or 0,1,2,3 or cpu')       #選擇使用的顯示卡     choice GPU 
-    parser.add_argument('--multi-scale', action='store_true', help='vary img-size +/- 50%%')        #更多圖片變化  Random vary img size #待測-----
-    parser.add_argument('--single-cls', action='store_true', help='train as single-class dataset')  #單種類訓練    Train single class on dataset
-    parser.add_argument('--adam', action='store_true', help='use torch.optim.Adam() optimizer')     #優化算法   Site: https://blog.csdn.net/KGzhang/article/details/77479737 #沒用
-    parser.add_argument('--sync-bn', action='store_true', help='use SyncBatchNorm, only available in DDP mode') #單機多卡處理方式？    SyncBatchNorm
-    parser.add_argument('--local_rank', type=int, default=-1, help='DDP parameter, do not modify')  #多機多卡、分佈式訓練的深度學習工程方法 Site: https://zhuanlan.zhihu.com/p/178402798
-    parser.add_argument('--log-imgs', type=int, default=48, help='number of images for W&B logging, max 100')   #W&B上傳檔案數量
-    parser.add_argument('--workers', type=int, default=12, help='maximum number of dataloader workers') #GPU Used Percent 測試最大16 RTX2070
-    parser.add_argument('--project', default='runs/train', help='save to project/name') #Save Path 除存檔案路徑
-    parser.add_argument('--name', default='exp', help='save to project/name') #Project Name 專案名稱
+    parser.add_argument('--device', default='', help='cuda device, i.e. 0 or 0,1,2,3 or cpu')                                   # 選擇使用的顯示卡     choice GPU 
+    parser.add_argument('--multi-scale', action='store_true', help='vary img-size +/- 50%%')                                    # 更多圖片變化  Random vary img size #待測-----
+    parser.add_argument('--single-cls', action='store_true', help='train as single-class dataset')                              # 單種類訓練    Train single class on dataset
+    parser.add_argument('--adam', action='store_true', help='use torch.optim.Adam() optimizer')                                 # 優化算法   Site: https://blog.csdn.net/KGzhang/article/details/77479737 #沒用
+    parser.add_argument('--sync-bn', action='store_true', help='use SyncBatchNorm, only available in DDP mode')                 # 單機多卡處理方式？    SyncBatchNorm
+    parser.add_argument('--local_rank', type=int, default=-1, help='DDP parameter, do not modify')                              # 多機多卡、分佈式訓練的深度學習工程方法 Site: https://zhuanlan.zhihu.com/p/178402798
+    parser.add_argument('--log-imgs', type=int, default=48, help='number of images for W&B logging, max 100')                   # W&B上傳檔案數量
+    parser.add_argument('--workers', type=int, default=12, help='maximum number of dataloader workers')                         # GPU Used Percent 測試最大16 RTX2070
+    parser.add_argument('--project', default='/home/HardDisk/61075029H/YOLO/train', help='save to project/name')                # Save Path 除存檔案路徑
+    parser.add_argument('--name', default='exp', help='save to project/name')                                                   # Project Name 專案名稱
     parser.add_argument('--exist-ok', action='store_true', help='existing project/name ok, do not increment')
     parser.add_argument('--drive', action='store_true', help='colab back up') #Custom Google Drive 自己加的Google雲端備份
     opt = parser.parse_args()
