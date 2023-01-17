@@ -22,10 +22,8 @@ from torch.nn.parallel import DistributedDataParallel as DDP
 from torch.utils.tensorboard import SummaryWriter
 from tqdm import tqdm
 
-import test  
-#import test.py to get mAP after each epoch
-#from models.yolo import Model
-from models.models import *
+import test  # import test.py to get mAP after each epoch
+from models.models import *     # from models.yolo import Model
 from utils.autoanchor import check_anchors
 from utils.datasets import create_dataloader
 from utils.general import labels_to_class_weights, increment_path, labels_to_image_weights, init_seeds, \
@@ -50,7 +48,7 @@ def train(hyp, opt, device, tb_writer=None, wandb=None):
     save_dir, epochs, batch_size, total_batch_size, weights, rank , drive_backup= \
         Path(opt.save_dir), opt.epochs, opt.batch_size, opt.total_batch_size, opt.weights, opt.global_rank, opt.drive
 
-    # Directories
+    # Directories 目錄
     wdir = save_dir / 'weights'
     wdir.mkdir(parents=True, exist_ok=True)  # make dir
     last = wdir / 'last.pt'
@@ -127,7 +125,7 @@ def train(hyp, opt, device, tb_writer=None, wandb=None):
     if wandb and wandb.run is None:
         opt.hyp = hyp  # add hyperparameters
         wandb_run = wandb.init(config=opt, resume="allow",
-                               project='YOLOv4' if opt.project == 'runs/train' else "YOLO(correct)",
+                               project='YOLOv4' if opt.project == 'runs/train' else "YOLO(correct)",    # Set wandb topic
                                name=save_dir.stem,
                                id=ckpt.get('wandb_id') if 'ckpt' in locals() else None)
 
@@ -228,8 +226,8 @@ def train(hyp, opt, device, tb_writer=None, wandb=None):
     results = (0, 0, 0, 0, 0, 0, 0)  # P, R, mAP@.5, mAP@.5-.95, val_loss(box, obj, cls)
     scheduler.last_epoch = start_epoch - 1  # do not move
 
-    #torch.cuda.amp自动混合精度训练 FP32 to FP16 半精度運算 #https://blog.csdn.net/qq_38253797/article/details/116210911
-    #https://fcuai.tw/2020/08/14/mixed-precision/
+    # torch.cuda.amp自动混合精度训练 FP32 to FP16 半精度運算 #https://blog.csdn.net/qq_38253797/article/details/116210911
+    # https://fcuai.tw/2020/08/14/mixed-precision/
     scaler = amp.GradScaler(enabled=cuda)
     
     logger.info('Image sizes %g train, %g test\n'

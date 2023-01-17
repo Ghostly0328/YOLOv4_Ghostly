@@ -444,13 +444,14 @@ class RegpPooling2D(nn.Module): # 應用層 http://dx.doi.org/10.14311/nnw.2019.
 
         return NumberCounter
 
-class RegMean2D(nn.Module): # SelfMake
-    def __init__(self, kernel_size = 3, stride = 1, padding = 0, isclose = 30e-02):
+class RegMean2D(nn.Module): # 應用層 http://dx.doi.org/10.14311/nnw.2019.29.004
+    def __init__(self, kernel_size = 3, stride = 1, padding = 0, isclose = 30e-02, reflect = False):
         super(RegMean2D, self).__init__()
         self.k = _pair(kernel_size)
         self.stride = _pair(stride)
         self.padding = _quadruple(padding)
         self.isclose = isclose
+        self.reflect = reflect
     
     def forward(self, x):
 
@@ -463,16 +464,27 @@ class RegMean2D(nn.Module): # SelfMake
     def _RegMean(self, x):     
 
         # 進行填充開始單個計算數值
-        x = F.pad(x, (1,1,1,1),value=0).cuda()  # 外匡填充 0 進行計算 方便對數值比較 
-        x = x.unfold(4, 3, self.stride[0]).unfold(5, 3, self.stride[1]) # 進行附近數字檢查 大小為3 步長1 9*9  
+        if self.reflect:            
+            x = F.pad(x, (1,1,1,1), mode='reflect').cuda()  # 鏡像填充 
+        else:
+            x = F.pad(x, (1,1,1,1), value = 0).cuda()  # 0值填充
 
-        array = x[:,:,:,:,:,:,1,1].unsqueeze(-1).unsqueeze(-1).repeat(1,1,1,1,1,1,3,3)
+        if self.k[0] >= 10:
+            x = x.unfold(4, 5, self.stride[0]).unfold(5, 5, self.stride[1]) # 進行附近數字檢查 大小為3 步長1 9*9  
+            array = x[:,:,:,:,:,:,1,1].unsqueeze(-1).unsqueeze(-1).repeat(1,1,1,1,1,1,5,5)
+        else:
+            x = x.unfold(4, 3, self.stride[0]).unfold(5, 3, self.stride[1]) # 進行附近數字檢查 大小為3 步長1 9*9  
+            array = x[:,:,:,:,:,:,1,1].unsqueeze(-1).unsqueeze(-1).repeat(1,1,1,1,1,1,3,3)
         # print(self.isclose)
-        array = torch.isclose(x, array, rtol=self.isclose, atol= 0)
+        array = torch.isclose(x, array, rtol=self.isclose, atol= 0) #isclose 範圍調整    #https://runebook.dev/zh-CN/docs/pytorch/generated/torch.isclose
         array = torch.sum(array, (6,7), dtype=torch.half) - 1
         array = array.view(array.size()[:4] + (-1,))
         maxNumber_array,_= torch.max(array, dim= -1, keepdim=True)
-        x = x[:,:,:,:,:,:,1,1]
+
+        if self.k[0] >= 10:
+            x = x[:,:,:,:,:,:,2,2]
+        else:
+            x = x[:,:,:,:,:,:,1,1]
         x = x.contiguous().view(x.size()[:4] + (-1,))
         
         array = torch.eq(array, maxNumber_array)
@@ -483,7 +495,7 @@ class RegMean2D(nn.Module): # SelfMake
         x = torch.sum(x, dim = -1) / array
         
         return x
-
+    
     def _CaseEnumeration(self, x):
 
         #原始圖片進行reflect填充      

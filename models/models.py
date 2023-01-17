@@ -142,7 +142,7 @@ def create_modules(module_defs, img_size, cfg):
             modules = Regppool
             
             # See the info
-            print('%s-%s  isclose: %s'%(i, mdef['type'], isclose))
+            print('%s-%s  isclose: %s, k: %s'%(i, mdef['type'], isclose, k))
 
         elif mdef['type'] == 'RegMean':
             k = mdef['size']  # kernel size
