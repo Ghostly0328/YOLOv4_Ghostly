@@ -6,6 +6,10 @@ __pycache__/
 # C extensions
 *.so
 
+# Dataset
+Object
+/data/samples
+
 # YOLO Weights 排除權重檔
 *.weights
 

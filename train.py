@@ -66,7 +66,7 @@ def train(hyp, opt, device, tb_writer=None, wandb=None):
     # Configure
     plots = not opt.evolve  # create plots
     cuda = device.type != 'cpu'
-    init_seeds(2 + rank)
+    init_seeds(0)
     with open(opt.data) as f:
         data_dict = yaml.load(f, Loader=yaml.FullLoader)  # data dict
     with torch_distributed_zero_first(rank):
@@ -213,7 +213,6 @@ def train(hyp, opt, device, tb_writer=None, wandb=None):
             #     check_anchors(dataset, model=model, thr=hyp['anchor_t'], imgsz=imgsz)
 
     # Model parameters
-    #TODO: 修正cls 80跟20 COCO VOC
     hyp['cls'] *= nc / 80.  # scale coco-tuned hyp['cls'] to current dataset （80, 20）
     model.nc = nc  # attach number of classes to model
     model.hyp = hyp  # attach hyperparameters to model
@@ -347,7 +346,7 @@ def train(hyp, opt, device, tb_writer=None, wandb=None):
                 ema.update_attr(model)
             final_epoch = epoch + 1 == epochs
             if not opt.notest or final_epoch:  # Calculate mAP
-                if epoch >= 10:
+                if epoch >= 5:
                     results, maps, times = test.test(opt.data,
                                                  batch_size=batch_size*2, #batch_size*2
                                                  imgsz=imgsz_test,
@@ -369,11 +368,22 @@ def train(hyp, opt, device, tb_writer=None, wandb=None):
                     'metrics/precision', 'metrics/recall', 'metrics/mAP_0.5', 'metrics/mAP_0.5:0.95',
                     'val/box_loss', 'val/obj_loss', 'val/cls_loss',  # val loss
                     'x/lr0', 'x/lr1', 'x/lr2']  # params
+
             for x, tag in zip(list(mloss[:-1]) + list(results) + lr, tags):
                 if tb_writer:
                     tb_writer.add_scalar(tag, x, epoch)  # tensorboard
                 if wandb:
                     wandb.log({tag: x})  # W&B
+                    
+            # if wandb:
+            #     wandb_log_dict = {}
+            # for x, tag in zip(list(mloss[:-1]) + list(results) + lr, tags):
+            #     if tb_writer:
+            #         tb_writer.add_scalar(tag, x, epoch)  # tensorboard
+            #     if wandb:
+            #         wandb_log_dict[tag] = x
+            # if wandb:
+            #     wandb.log(wandb_log_dict)  # W&B
 
             # Update best mAP
             fi = fitness(np.array(results).reshape(1, -1))  # weighted combination of [P, R, mAP@.5, mAP@.5-.95]
@@ -508,8 +518,8 @@ if __name__ == '__main__':
     parser.add_argument('--sync-bn', action='store_true', help='use SyncBatchNorm, only available in DDP mode') #單機多卡處理方式？    SyncBatchNorm
     parser.add_argument('--local_rank', type=int, default=-1, help='DDP parameter, do not modify')  #多機多卡、分佈式訓練的深度學習工程方法 Site: https://zhuanlan.zhihu.com/p/178402798
     parser.add_argument('--log-imgs', type=int, default=48, help='number of images for W&B logging, max 100')   #W&B上傳檔案數量
-    parser.add_argument('--workers', type=int, default=12, help='maximum number of dataloader workers') #GPU Used Percent 測試最大16 RTX2070
-    parser.add_argument('--project', default='runs/train', help='save to project/name') #Save Path 除存檔案路徑
+    parser.add_argument('--workers', type=int, default=0, help='maximum number of dataloader workers') #GPU Used Percent 測試最大16 RTX2070
+    parser.add_argument('--project', default='/home/HardDisk/61075029h/YOLO/train', help='save to project/name') #Save Path 除存檔案路徑 /home/HardDisk/61075029h/YOLO/train
     parser.add_argument('--name', default='exp', help='save to project/name') #Project Name 專案名稱
     parser.add_argument('--exist-ok', action='store_true', help='existing project/name ok, do not increment')
     parser.add_argument('--drive', action='store_true', help='colab back up') #Custom Google Drive 自己加的Google雲端備份

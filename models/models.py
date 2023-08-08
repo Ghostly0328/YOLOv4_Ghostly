@@ -142,6 +142,18 @@ def create_modules(module_defs, img_size, cfg):
                 None
             else:
                 modules = Regppool
+                
+        elif mdef['type'] == 'RegMean':
+            k = mdef['size']  # kernel size
+            stride = mdef['stride']
+            isclose = float(mdef['isclose'])
+            
+            RegpMean = RegMean2D(kernel_size= k, stride= stride, padding= (k - 1) // 2, isclose = isclose)
+            modules = RegpMean
+            
+            # See the info
+            print('{%s}  isclose: {%s}'%(mdef['type'], isclose))
+
 
         elif mdef['type'] == 'local_avgpool':
             k = mdef['size']  # kernel size
