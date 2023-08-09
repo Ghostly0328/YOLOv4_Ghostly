@@ -1,6 +1,6 @@
 #data path
-train: ./dataSet/VOC2007/trainval.txt
-val: ./dataSet/VOC2007/test.txt
+train: ./data/dataset/VOC2007/trainval.txt
+val: ./data/dataset/VOC2007/test.txt
 
 # number of classes
 nc: 20

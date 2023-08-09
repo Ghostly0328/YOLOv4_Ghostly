@@ -1,0 +1,10 @@
+#data path
+train: ./Object/cfg/train.txt
+#val: ./Object/cfg/test.txt
+val: ./data/dataset/BigShop/val5k.txt
+
+# number of classes
+nc: 3
+
+# class names
+names: ['Apple', 'Guava' ,'Orange']

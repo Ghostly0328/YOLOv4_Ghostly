@@ -57,12 +57,13 @@ def ap_per_class(tp, conf, pred_cls, target_cls, plot=False, fname='precision-re
     # Sort by objectness
     i = np.argsort(-conf)
     tp, conf, pred_cls = tp[i], conf[i], pred_cls[i]
-    #print(tp.shape[1])
+    
     # Find unique classes
     unique_classes = np.unique(target_cls)
 
     # Create Precision-Recall curve and compute AP for each class
     px, py = np.linspace(0, 1, 1000), []  # for plotting
+    # px = np.arange(0., 1.1, 0.1)
     pr_score = 0.1  # score to evaluate P and R https://github.com/ultralytics/yolov3/issues/898
     s = [unique_classes.shape[0], tp.shape[1]]  # number class, number iou thresholds (i.e. 10 for mAP0.5...0.95)
     ap, p, r = np.zeros(s), np.zeros(s), np.zeros(s)
@@ -103,6 +104,10 @@ def ap_per_class(tp, conf, pred_cls, target_cls, plot=False, fname='precision-re
         fig, ax = plt.subplots(1, 1, figsize=(5, 5))
         ax.plot(px, py, linewidth=0.5, color='grey')  # plot(recall, precision)
         ax.plot(px, py.mean(1), linewidth=2, color='blue', label='all classes %.3f mAP@0.5' % ap[:, 0].mean())
+        # value = 0
+        # for i in range(9):
+        #     value = value + (px[i+1] - px[i]) * py.mean(1)[i+1]
+        # print(value)
         ax.set_xlabel('Recall')
         ax.set_ylabel('Precision')
         ax.set_xlim(0, 1)

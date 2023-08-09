@@ -98,7 +98,8 @@ def test(data,
     if not training:
         img = torch.zeros((1, 3, imgsz, imgsz), device=device)  # init img
         _ = model(img.half() if half else img) if device.type != 'cpu' else None  # run once
-        path = data['test'] if opt.task == 'test' else data['val']  # path to val/test images
+        # path = data['test'] if opt.task == 'test' else data['val']  # path to val/test images
+        path = data['{}'.format(opt.task)]# path to val/test images
         dataloader = create_dataloader(path, imgsz, batch_size, 64, opt, pad=0.5, rect=True)[0]
 
     seen = 0
@@ -301,8 +302,8 @@ if __name__ == '__main__':
     parser.add_argument('--batch-size', type=int, default=2, help='size of each image batch')
     parser.add_argument('--img-size', type=int, default=640, help='inference size (pixels)')
     parser.add_argument('--conf-thres', type=float, default=0.001, help='object confidence threshold')
-    parser.add_argument('--iou-thres', type=float, default=0.65, help='IOU threshold for NMS') # 0.45 0.65
-    parser.add_argument('--task', default='test', help="'val', 'test', 'study' choose in .yaml dataset")
+    parser.add_argument('--iou-thres', type=float, default=0.65, help='IOU threshold for NMS') #0.45
+    parser.add_argument('--task', default='val', help="'val', 'test', 'study', 'quiz' choose in .yaml dataset")
     parser.add_argument('--device', default='', help='cuda device, i.e. 0 or 0,1,2,3 or cpu')
     parser.add_argument('--single-cls', action='store_true', help='treat as single-class dataset')
     parser.add_argument('--augment', action='store_true', help='augmented inference')
@@ -320,7 +321,7 @@ if __name__ == '__main__':
     opt.data = check_file(opt.data)  # check file
     print(opt)
 
-    if opt.task in ['val', 'test']:  # run normally
+    if opt.task in ['val', 'test', 'quiz']:  # run normally
         test(opt.data,
              opt.weights,
              opt.batch_size,

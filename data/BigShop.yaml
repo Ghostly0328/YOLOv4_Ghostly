@@ -1,0 +1,9 @@
+#data path
+train: ./data/dataset/BigShop/5k.txt
+val: ./data/dataset/BigShop/val5k.txt
+
+# number of classes
+nc: 3
+
+# class names
+names: ['Apple', 'Orange', 'Guava']
