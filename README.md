@@ -20,9 +20,10 @@ This is PyTorch implementation of [YOLOv4](https://github.com/AlexeyAB/darknet) 
 
 ## 安裝需要軟體 Requirements
 
-
 ```bash
-pip install -r requirements.txt
+conda env create -f environments.yml
+conda activate yolov4
+pip install torch==1.11.0+cu113 torchvision==0.12.0+cu113 -f https://download.pytorch.org/whl/torch_stable.html
 ```
 
 下載權重檔(.weight)和模型(.cfg)並放到 ./models/weights/ 和 ./models/cfg/

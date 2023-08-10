@@ -1,9 +1,0 @@
-github : https://github.com/WongKinYiu/PyTorch_YOLOv4
-
-1. requirements 要改成 numpy == 1.17.3 
-2. pip install -r requirements.txt 
-3. download weight cfg
-4. python detect.py --cfg ./models/cfg/yolov3.cfg --weights ./models/weights/yolov3_320.weights --source ./data/samples/Images/ 
-5. --source後面也可以放mp4影片檔案
-
-python detect.py -h #使用說明
