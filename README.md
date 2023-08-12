@@ -45,7 +45,9 @@ apt-get install gcc libglib2.0-0
 pip install -r requirements.txt
 ```
 
-2. 下載[權重檔](https://GhostlyNas.myqnapcloud.com/share.cgi?ssid=deb8def512a54831a436ea40435fbb9d)和[數據集](https://GhostlyNas.myqnapcloud.com/share.cgi?ssid=abb022d2e2144ed6ac637c749f71b903)並放到 ./models/weights/ 和 ./data/dataset/
+2. 下載[權重檔和數據集](https://www.myqnapcloud.com/smartshare/75ge20j07p84o285u1vu7x7a_ebff2i5j62252n21r41ty655b781defg)並放到 ./models/weights/ 和 ./data/dataset/
+
+> 需要密碼或下載點壞了可以寄email跟我拿
 
 ## 測試結果
 
