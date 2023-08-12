@@ -123,20 +123,23 @@ def test(data,
         whwh = torch.Tensor([width, height, width, height]).to(device)
 
         # Disable gradients
-        with torch.no_grad():
-            # Run model
-            t = time_synchronized()
-            inf_out, train_out = model(img, augment=augment)  # inference and training outputs
-            t0 += time_synchronized() - t
+        try:
+            with torch.no_grad():
+                # Run model
+                t = time_synchronized()
+                inf_out, train_out = model(img, augment=augment)  # inference and training outputs
+                t0 += time_synchronized() - t
 
-            # Compute loss
-            if training:  # if model has loss hyperparameters
-                loss += compute_loss([x.float() for x in train_out], targets, model)[1][:3]  # box, obj, cls
+                # Compute loss
+                if training:  # if model has loss hyperparameters
+                    loss += compute_loss([x.float() for x in train_out], targets, model)[1][:3]  # box, obj, cls
 
-            # Run NMS
-            t = time_synchronized()
-            output = non_max_suppression(inf_out, conf_thres=conf_thres, iou_thres=iou_thres)
-            t1 += time_synchronized() - t
+                # Run NMS
+                t = time_synchronized()
+                output = non_max_suppression(inf_out, conf_thres=conf_thres, iou_thres=iou_thres)
+                t1 += time_synchronized() - t
+        except:
+            continue
 
         # Statistics per image
         for si, pred in enumerate(output):

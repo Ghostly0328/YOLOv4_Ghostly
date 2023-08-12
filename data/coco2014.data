@@ -1,4 +1,0 @@
-classes= 80
-train=./dataset/coco2014/train/trainvalno5k.txt
-valid=./dataset/coco2014/val/5k.txt
-names= data/coco.names

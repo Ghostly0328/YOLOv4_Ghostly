@@ -1,9 +1,0 @@
-#data path
-train: ./data/dataset/store/train.txt
-val: ./data/dataset/store/val.txt
-
-# number of classes
-nc: 10
-
-# class names
-names: ['Apple', 'Banana', 'Cake', 'Cookie', 'Eraser', 'Lemon', 'Orange', 'Sandwich', 'Tomato', 'Watermelon']
