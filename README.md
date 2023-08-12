@@ -1,6 +1,10 @@
 # YOLOv4
 
-This is PyTorch implementation of [YOLOv4](https://github.com/AlexeyAB/darknet) which is based on [[YOLOv4_WongKinYiu on github]](https://github.com/WongKinYiu/PyTorch_YOLOv4).
+透過修改YOLOv4的網路架構來提升對於小目標的檢測效果
+
+<details><summary> <b>相關 Github</b> </summary>
+
+* [YOLOv4_WongKinYiu on github](https://github.com/WongKinYiu/PyTorch_YOLOv4)
 
 * [[ultralytics/yolov3]](https://github.com/ultralytics/yolov3)
 
@@ -8,9 +12,9 @@ This is PyTorch implementation of [YOLOv4](https://github.com/AlexeyAB/darknet) 
 
 * [[ultralytics/yolov5 based PyTorch implementation of YOLOv4]](https://github.com/WongKinYiu/PyTorch_YOLOv4/tree/u5).
 
-### 開發日誌
+</details>
 
-<details><summary> <b>展開</b> </summary>
+<details><summary> <b>開發日誌</b> </summary>
 
 * `2022-06-28` - 分支並上傳
 * `2023-08-09` - 上傳最後版本
@@ -21,7 +25,7 @@ This is PyTorch implementation of [YOLOv4](https://github.com/AlexeyAB/darknet) 
 
 ## 安裝要求 Installation Requirements
 
-Ubuntu:  
+1. Ubuntu:  
 確保先安裝 Anaconda，然後執行以下命令
 
 ```bash
@@ -30,8 +34,8 @@ conda env create -f environments.yml
 conda activate yolov4
 pip install torch==1.11.0+cu113 torchvision==0.12.0+cu113 -f https://download.pytorch.org/whl/torch_stable.html
 ```
-docker (建議):  
-記得需要先安裝具有GPU的docker，可以參考這個[網址](https://hackmd.io/@joshhu/Sy8MQetvS)來測試
+1. docker (建議):  
+需要先安裝具有GPU的docker，可以參考這個[網址](https://hackmd.io/@joshhu/Sy8MQetvS)來測試
 ```bash
 docker pull pytorch/pytorch:1.11.0-cuda11.3-cudnn8-runtime
 docker run --name yolov4 -it -v /git_path/:/yolo --workdir /yolo --rm --gpus 0 --shm-size=64g pytorch/pytorch:1.11.0-cuda11.3-cudnn8-runtime
@@ -41,7 +45,17 @@ apt-get install gcc libglib2.0-0
 pip install -r requirements.txt
 ```
 
-下載權重檔(.weight)和數據集並放到 ./models/weights/ 和 ./data/dataset/
+2. 下載[權重檔](https://GhostlyNas.myqnapcloud.com/share.cgi?ssid=deb8def512a54831a436ea40435fbb9d)和[數據集](https://GhostlyNas.myqnapcloud.com/share.cgi?ssid=abb022d2e2144ed6ac637c749f71b903)並放到 ./models/weights/ 和 ./data/dataset/
+
+## 測試結果
+
+總共有三個資料集可以進行測試，分別是FloW、VOC、WIDERFACE
+
+```bash
+bash models/weights/FloW/test.sh
+bash models/weights/VOC/test.sh
+bash models/weights/WIDER/test.sh
+```
 
 ## 檢測 Detect
 
