@@ -15,20 +15,33 @@ This is PyTorch implementation of [YOLOv4](https://github.com/AlexeyAB/darknet) 
 * `2022-06-28` - 分支並上傳
 * `2023-08-09` - 上傳最後版本
 * `2023-08-10` - 修改README.MD 
+* `2023-08-12` - 簡化資料集路徑，添加docker操作教學
 
 </details>
 
-## 安裝需要軟體 Requirements
+## 安裝要求 Installation Requirements
+
+Ubuntu:  
+確保先安裝 Anaconda，然後執行以下命令
 
 ```bash
+git clone https://github.com/Ghostly0328/YOLOv4_Ghostly.git
 conda env create -f environments.yml
 conda activate yolov4
 pip install torch==1.11.0+cu113 torchvision==0.12.0+cu113 -f https://download.pytorch.org/whl/torch_stable.html
 ```
+docker (建議):  
+記得需要先安裝具有GPU的docker，可以參考這個[網址](https://hackmd.io/@joshhu/Sy8MQetvS)來測試
+```bash
+docker pull pytorch/pytorch:1.11.0-cuda11.3-cudnn8-runtime
+docker run --name yolov4 -it -v /git_path/:/yolo --workdir /yolo --rm --gpus 0 --shm-size=64g pytorch/pytorch:1.11.0-cuda11.3-cudnn8-runtime
+apt update
+apt install -y zip htop screen libgl1-mesa-glx
+apt-get install gcc libglib2.0-0
+pip install -r requirements.txt
+```
 
-下載權重檔(.weight)和模型(.cfg)並放到 ./models/weights/ 和 ./models/cfg/
-
-※ For running Mish models, please install https://github.com/thomasbrandon/mish-cuda
+下載權重檔(.weight)和數據集並放到 ./models/weights/ 和 ./data/dataset/
 
 ## 檢測 Detect
 

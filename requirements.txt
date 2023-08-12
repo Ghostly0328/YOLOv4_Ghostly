@@ -1,0 +1,11 @@
+numpy
+matplotlib
+pycocotools
+tqdm
+pillow
+tensorboard
+sympy
+pyyaml
+tqdm
+scipy
+opencv-python
