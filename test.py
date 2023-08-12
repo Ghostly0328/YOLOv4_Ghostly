@@ -123,6 +123,7 @@ def test(data,
         whwh = torch.Tensor([width, height, width, height]).to(device)
 
         # Disable gradients
+        # FIXME: 在測試到最後一張圖片時會報錯誤
         try:
             with torch.no_grad():
                 # Run model
